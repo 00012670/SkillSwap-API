@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BISP_API", "BISP_API\BISP_API.csproj", "{26414F7D-849F-45E1-8978-1863D8D7C153}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{26414F7D-849F-45E1-8978-1863D8D7C153}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26414F7D-849F-45E1-8978-1863D8D7C153}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26414F7D-849F-45E1-8978-1863D8D7C153}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26414F7D-849F-45E1-8978-1863D8D7C153}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E85393A3-763A-4D65-8593-7B2A08B01368}
+	EndGlobalSection
+EndGlobal

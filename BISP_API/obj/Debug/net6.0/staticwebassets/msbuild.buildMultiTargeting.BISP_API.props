@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\BISP_API.props" />
+</Project>

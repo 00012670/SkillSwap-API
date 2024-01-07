@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BISP_API.Migrations
 {
-    [DbContext(typeof(dbContext))]
+    [DbContext(typeof(BISPdbContext))]
     [Migration("20240104110818_v1")]
     partial class v1
     {

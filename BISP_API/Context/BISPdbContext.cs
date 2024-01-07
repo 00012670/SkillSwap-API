@@ -3,14 +3,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BISP_API.Context
 {
-    public class dbContext : DbContext
+    public class BISPdbContext : DbContext
     {
-        public dbContext(DbContextOptions<dbContext> o) : base(o)
+        public BISPdbContext(DbContextOptions<BISPdbContext> o) : base(o)
         {
-
+            Database.EnsureCreated();
         }
 
-        public DbSet<Authentication> Authentications {get; set; }
+        public DbSet<Authentication> Authentications { get; set; }
+        public DbSet<Skill> Skills { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

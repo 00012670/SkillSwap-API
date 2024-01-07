@@ -5,6 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+
 
 namespace BISP_API.Controllers
 {
@@ -12,9 +18,9 @@ namespace BISP_API.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        private readonly dbContext _authContext;
+        private readonly BISPdbContext _authContext;
 
-        public AuthenticationController(dbContext appDbContext)
+        public AuthenticationController(BISPdbContext appDbContext)
         {
             _authContext = appDbContext;
         }
@@ -35,8 +41,11 @@ namespace BISP_API.Controllers
                 return BadRequest(new { Message = "Password is Incorrect" });
             }
 
+            auth.Token = CreateJwt(auth);
+
             return Ok(new
             {
+                Token = auth.Token,
                 Message = "Login success!"
             });
         }
@@ -85,5 +94,35 @@ namespace BISP_API.Controllers
                 sb.Append("Password should contain special charcter" + Environment.NewLine);
             return sb.ToString();
         }
+
+        private string CreateJwt(Authentication auth)
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes("veryverysceret.....");
+            var identity = new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.Role, auth.Role),
+                new Claim(ClaimTypes.Name,$"{auth.Username}")
+            });
+
+            var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = identity,
+                Expires = DateTime.Now.AddDays(10),
+                SigningCredentials = credentials
+            };
+            var token = jwtTokenHandler.CreateToken(tokenDescriptor);
+            return jwtTokenHandler.WriteToken(token);
+
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<Authentication>> GetAllUsers()
+        {
+            return Ok(await _authContext.Authentications.ToListAsync());
+        }
     }
+
 }

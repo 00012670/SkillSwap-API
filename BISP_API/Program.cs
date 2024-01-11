@@ -1,6 +1,8 @@
 using BISP_API.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -46,6 +48,14 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
+builder.Services.Configure<FormOptions>(o =>
+{
+    o.ValueLengthLimit = int.MinValue;
+    o.MultipartBodyLengthLimit = int.MaxValue; 
+    o.MemoryBufferThreshold = int.MinValue;
+});
+
+
 var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -59,7 +69,10 @@ app.UseHttpsRedirection();
 app.UseCors("MyPolicy");
 
 app.UseAuthentication();
+
 app.UseAuthorization();
+
+app.UseStaticFiles();
 
 app.MapControllers();
 

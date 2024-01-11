@@ -21,14 +21,14 @@ namespace BISP_API.Controllers
 
         public async Task<IActionResult> GetAllSkills()
         {
-            var skills = await _dbContext.Skills.ToListAsync();
+            var skills = await _dbContext.Profiles.ToListAsync();
             return Ok(skills);
         }
 
         [HttpPost]
         public async Task<IActionResult> AddSkill([FromBody] Skill skillRequest)
         {
-            _dbContext.Skills.Add(skillRequest);
+            _dbContext.Profiles.Add(skillRequest);
             await _dbContext.SaveChangesAsync();
 
             return Ok(skillRequest);
@@ -36,9 +36,9 @@ namespace BISP_API.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<IActionResult> GetSkill([FromRoute] int id)
+        public async Task<IActionResult> GetSkillbyId([FromRoute] int id)
         {
-            var skill = await _dbContext.Skills.FirstOrDefaultAsync(x => x.Id == id);
+            var skill = await _dbContext.Profiles.FirstOrDefaultAsync(x => x.SkillId == id);
 
             if (skill == null)
             {
@@ -52,7 +52,7 @@ namespace BISP_API.Controllers
         [Route("{id}")]
         public async Task<IActionResult> UpdateSkill([FromRoute] int id, Skill updateSkillRequest)
         {
-            var skill = await _dbContext.Skills.FindAsync(id);
+            var skill = await _dbContext.Profiles.FindAsync(id);
 
             if (skill == null)
             {
@@ -63,7 +63,7 @@ namespace BISP_API.Controllers
             skill.Description = updateSkillRequest.Description;
             skill.Category = updateSkillRequest.Category;
             skill.Level = updateSkillRequest.Level;
-            skill.Prerequisites = updateSkillRequest.Prerequisites;
+            skill.Prerequisity = updateSkillRequest.Prerequisity;
             skill.Picture = updateSkillRequest.Picture;
 
             await _dbContext.SaveChangesAsync();
@@ -75,7 +75,7 @@ namespace BISP_API.Controllers
         [Route("{id}")]
         public async Task<IActionResult> DeleteSkill([FromRoute] int id)
         {
-            var skill = await _dbContext.Skills.FindAsync(id);
+            var skill = await _dbContext.Profiles.FindAsync(id);
 
             if (skill == null)
             {

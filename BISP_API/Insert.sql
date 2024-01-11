@@ -6,7 +6,7 @@ GO
    Create Tables
 ********************************************************************************/
 
-CREATE TABLE [dbo].[authentications](
+CREATE TABLE [dbo].[users](
 	[AuthId] [int] IDENTITY(1,1) NOT NULL,
 	[Username] [nvarchar](max) NULL,
 	[Email] [nvarchar](max) NULL,
@@ -21,20 +21,22 @@ CREATE TABLE [dbo].[authentications](
 GO
 
 CREATE TABLE [dbo].[skills](
-	[Id] [int] IDENTITY(1,1) NOT NULL,
-	[Name] [nvarchar](max) NULL,
-	[Email] [nvarchar](max) NULL,
-	[Description] [nvarchar](max) NULL,
-	[Category] [nvarchar](max) NULL,
-	[Level] [nvarchar](max) NULL,
-	[Prerequisites] [nvarchar](max) NULL,
-    [Picture] [nvarchar](max) NULL
- CONSTRAINT [PK_skills] PRIMARY KEY CLUSTERED 
-(
-	[Id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+    [Id] [int] IDENTITY(1,1) NOT NULL,
+    [Name] [nvarchar](max) NULL,
+    [Email] [nvarchar](max) NULL,
+    [Description] [nvarchar](max) NULL,
+    [Category] [nvarchar](max) NULL,
+    [Level] [nvarchar](max) NULL,
+    [Prerequisity] [nvarchar](max) NULL,
+    [Picture] [nvarchar](max) NULL,
+    CONSTRAINT [PK_skills] PRIMARY KEY CLUSTERED 
+    (
+        [Id] ASC
+    )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
+
+
 
 CREATE TABLE Habits (
     ID INT IDENTITY PRIMARY KEY,
@@ -103,7 +105,7 @@ VALUES
    Drop Tables
 ********************************************************************************/
 
-DROP TABLE Authentications
+DROP TABLE Users
 
 DROP TABLE Skills
 

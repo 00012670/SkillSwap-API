@@ -10,12 +10,14 @@ namespace BISP_API.Context
             Database.EnsureCreated();
         }
 
-        public DbSet<Authentication> Authentications { get; set; }
-        public DbSet<Skill> Skills { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Skill> Profiles { get; set; }
+    //    public DbSet<Profile> Profiles { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Authentication>().ToTable("authentications");
+            modelBuilder.Entity<User>().ToTable("authentications");
         }
     }
 }

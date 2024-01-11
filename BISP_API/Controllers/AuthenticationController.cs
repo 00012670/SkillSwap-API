@@ -5,11 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using System.Text;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 
 
 namespace BISP_API.Controllers
@@ -18,20 +16,20 @@ namespace BISP_API.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        private readonly BISPdbContext _authContext;
+        private readonly BISPdbContext _userContext;
 
         public AuthenticationController(BISPdbContext appDbContext)
         {
-            _authContext = appDbContext;
+            _userContext = appDbContext;
         }
 
         [HttpPost("authenticate")]
-        public async Task<IActionResult> Authenticate([FromBody] Authentication authObj)
+        public async Task<IActionResult> Authenticate([FromBody] User authObj)
         {
             if (authObj == null)
                 return BadRequest();
 
-            var auth = await _authContext.Authentications
+            var auth = await _userContext.Users
                 .FirstOrDefaultAsync(x => x.Username == authObj.Username);
             if (auth == null)
                 return NotFound(new { Message = "User not found?" });
@@ -51,7 +49,7 @@ namespace BISP_API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser([FromBody] Authentication authObj)
+        public async Task<IActionResult> RegisterUser([FromBody] User authObj)
         {
             if (authObj == null)
                 return BadRequest();
@@ -70,8 +68,8 @@ namespace BISP_API.Controllers
             authObj.Password = PasswordHasher.HashPassword(authObj.Password);
             authObj.Role = "User";
             authObj.Token = "";
-            await _authContext.AddAsync(authObj);
-            await _authContext.SaveChangesAsync();
+            await _userContext.AddAsync(authObj);
+            await _userContext.SaveChangesAsync();
             return Ok(new
             {
                 Status = 200,
@@ -80,10 +78,10 @@ namespace BISP_API.Controllers
         }
 
         private Task<bool> CheckEmailExistAsync(string? email)
-             => _authContext.Authentications.AnyAsync(x => x.Email == email);
+             => _userContext.Users.AnyAsync(x => x.Email == email);
 
         private Task<bool> CheckUsernameExistAsync(string? username)
-            => _authContext.Authentications.AnyAsync(x => x.Username == username);
+            => _userContext.Users.AnyAsync(x => x.Username == username);
 
         private static string CheckPasswordStrength(string pass)
         {
@@ -95,7 +93,7 @@ namespace BISP_API.Controllers
             return sb.ToString();
         }
 
-        private string CreateJwt(Authentication auth)
+        private string CreateJwt(User auth)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes("veryverysceret.....");
@@ -116,12 +114,6 @@ namespace BISP_API.Controllers
             var token = jwtTokenHandler.CreateToken(tokenDescriptor);
             return jwtTokenHandler.WriteToken(token);
 
-        }
-
-        [HttpGet]
-        public async Task<ActionResult<Authentication>> GetAllUsers()
-        {
-            return Ok(await _authContext.Authentications.ToListAsync());
         }
     }
 

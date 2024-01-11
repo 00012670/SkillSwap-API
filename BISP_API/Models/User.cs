@@ -1,18 +1,28 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BISP_API.Models
 {
-    public class Authentication
+    [Table("User")]
+    public class User
     {
         [Key]
 
-        public int AuthId { get; set; }
+        public int UserId { get; set; }
 
         public string Username { get; set; }
 
         public string Email { get; set; }
 
         public string Password { get; set; }
+
+        public string FullName { get; set; }
+
+        public string Bio { get; set; }
+
+        public string SkillInterested { get; set; }
+
+        public string Picture { get; set; }
 
         public string Token { get; set; }
 

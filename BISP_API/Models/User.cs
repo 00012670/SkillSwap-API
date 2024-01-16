@@ -8,7 +8,7 @@ namespace BISP_API.Models
     {
         [Key]
 
-        public int UserId { get; set; }
+        public int Id { get; set; }
 
         public string Username { get; set; }
 
@@ -21,8 +21,6 @@ namespace BISP_API.Models
         public string Bio { get; set; }
 
         public string SkillInterested { get; set; }
-
-        public string Picture { get; set; }
 
         public string Token { get; set; }
 

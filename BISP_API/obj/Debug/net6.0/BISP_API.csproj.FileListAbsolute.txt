@@ -132,3 +132,4 @@ C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\obj\Debug\net6.0\refint\BISP_API.
 C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\obj\Debug\net6.0\BISP_API.pdb
 C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\obj\Debug\net6.0\BISP_API.genruntimeconfig.cache
 C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\obj\Debug\net6.0\ref\BISP_API.dll
+C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\BISP_API.staticwebassets.runtime.json

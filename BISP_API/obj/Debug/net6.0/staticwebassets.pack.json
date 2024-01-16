@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\wwwroot\\Uploads\\Profile\\.png",
+      "PackagePath": "staticwebassets\\Uploads\\Profile\\.png"
+    },
+    {
+      "Id": "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\wwwroot\\Uploads\\Profile\\1\\1.png",
+      "PackagePath": "staticwebassets\\Uploads\\Profile\\1\\1.png"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.BISP_API.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.build.BISP_API.props",
+      "PackagePath": "build\\BISP_API.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.buildMultiTargeting.BISP_API.props",
+      "PackagePath": "buildMultiTargeting\\BISP_API.props"
+    },
+    {
+      "Id": "obj\\Debug\\net6.0\\staticwebassets\\msbuild.buildTransitive.BISP_API.props",
+      "PackagePath": "buildTransitive\\BISP_API.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

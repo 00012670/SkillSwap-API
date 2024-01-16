@@ -11,7 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -50,10 +49,11 @@ builder.Services.AddAuthentication(x =>
 
 builder.Services.Configure<FormOptions>(o =>
 {
-    o.ValueLengthLimit = int.MinValue;
-    o.MultipartBodyLengthLimit = int.MaxValue; 
-    o.MemoryBufferThreshold = int.MinValue;
+    o.ValueLengthLimit = int.MaxValue;
+    o.MultipartBodyLengthLimit = long.MaxValue;
+    o.MemoryBufferThreshold = int.MaxValue;
 });
+
 
 
 var app = builder.Build();
@@ -66,13 +66,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
 app.UseCors("MyPolicy");
 
 app.UseAuthentication();
 
 app.UseAuthorization();
-
-app.UseStaticFiles();
 
 app.MapControllers();
 

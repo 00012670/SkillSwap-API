@@ -1,23 +1,24 @@
 ﻿using BISP_API.Context;
+using BISP_API.Helper;
 using BISP_API.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http.Headers;
-using System.Net.Mime;
-using System.Security.Claims;
+
 
 namespace BISP_API.Controllers
 {
-    [Route("api/[controller]")]  
+    [Route("api/[controller]")]
     [ApiController]
     public class ProfileController : Controller
     {
         private readonly BISPdbContext _profileContext;
+        private readonly IWebHostEnvironment hostingEnv;
 
-        public ProfileController(BISPdbContext dbContext)
+        public ProfileController(BISPdbContext dbContext, IWebHostEnvironment environment)
         {
             _profileContext = dbContext;
+            hostingEnv = environment;
+
         }
 
 
@@ -26,7 +27,7 @@ namespace BISP_API.Controllers
         [Route("{id}")]
         public async Task<ActionResult> GetProfilebyId([FromRoute] int id)
         {
-            var profile = await _profileContext.Users.FirstOrDefaultAsync(x => x.UserId == id);
+            var profile = await _profileContext.Users.FirstOrDefaultAsync(x => x.Id == id);
 
             if (profile == null)
             {
@@ -35,8 +36,6 @@ namespace BISP_API.Controllers
 
             return Ok(profile);
         }
-
-
 
 
 
@@ -54,7 +53,6 @@ namespace BISP_API.Controllers
             profile.FullName = updateProfileRequest.FullName;
             profile.Bio = updateProfileRequest.Bio;
             profile.SkillInterested = updateProfileRequest.SkillInterested;
-            profile.Picture = updateProfileRequest.Picture;
 
             await _profileContext.SaveChangesAsync();
 
@@ -62,42 +60,88 @@ namespace BISP_API.Controllers
         }
 
 
-        [HttpGet]
-        public async Task<ActionResult<User>> GetAllUsers()
+        [HttpPut("UploadImage")]
+        public async Task<ActionResult> UploadImage(IFormFile formFile, string imgId)
         {
-            return Ok(await _profileContext.Users.ToListAsync());
+            APIResponse response = new();
+            try
+            {
+                string Filepath = GetFilePath(imgId);
+                if (!System.IO.Directory.Exists(Filepath))
+                {
+                    System.IO.Directory.CreateDirectory(Filepath);
+                }
+                string imagepath = Filepath + "\\" + imgId + ".png";
+                if (System.IO.File.Exists(imagepath))
+                {
+                    System.IO.File.Delete(imagepath);
+                }
+                using FileStream stream = System.IO.File.Create(imagepath);
+                await formFile.CopyToAsync(stream);
+                response.ResponseCode = 200;
+                response.Result = "pass";
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message;
+            }
+            return Ok(response);
         }
 
-        //[HttpPost, DisableRequestSizeLimit]
-        //public IActionResult UploadImage()
-        //{
-        //    try
-        //    {
-        //        var file = Request.Form.Files[0];
-        //        var folderName = Path.Combine("Resources", "Images");
-        //        var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
 
-        //        if(file.Length > 0)
-        //        {
-        //            var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
-        //            var fullPath = Path.Combine(pathToSave, fileName);
-        //            var dbPath = Path.Combine(folderName, fileName);
+        [HttpGet("GetImage")]
+        public async Task<IActionResult> GetImage(string imgId)
+        {
+            string Imageurl = string.Empty;
+            string hosturl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+            try
+            {
+                string Filepath = GetFilePath(imgId);
+                string imagepath = Filepath + "\\" + imgId + ".png";
+                if (System.IO.File.Exists(imagepath))
+                {
+                    Imageurl = hosturl + "/Uploads/Profile/" + imgId + "/" + imgId + ".png";
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return Ok(Imageurl);
+        }
 
-        //            using (var stream = new FileStream(fullPath, FileMode.Create))
-        //            {
-        //                file.CopyTo(stream);
-        //            }
-        //            return Ok(new { dbPath });
-        //        }
-        //        else
-        //        {
-        //            return BadRequest();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"Internal server error: {ex}");
-        //    }
-        //}
+        [HttpDelete("RemoveImage")]
+        public async Task<IActionResult> RemoveImage(string imgId)
+        {
+            try
+            {
+                string Filepath = GetFilePath(imgId);
+                string Imagepath = Filepath + "\\" + imgId + ".png";
+                if (System.IO.File.Exists(Imagepath))
+                {
+                    System.IO.File.Delete(Imagepath);
+                    return Ok("pass");
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
+
+       
+        [NonAction]
+        public string GetFilePath(string imgId)
+        {
+            return this.hostingEnv.WebRootPath + "\\Uploads\\Profile\\" + imgId;
+        }
+
     }
 }

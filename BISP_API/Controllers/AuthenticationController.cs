@@ -27,23 +27,24 @@ namespace BISP_API.Controllers
         public async Task<IActionResult> Authenticate([FromBody] User authObj)
         {
             if (authObj == null)
-                return BadRequest();
+                return BadRequest(new { Message = "Request body is missing" });
+
 
             var auth = await _userContext.Users
                 .FirstOrDefaultAsync(x => x.Username == authObj.Username);
             if (auth == null)
-                return NotFound(new { Message = "User not found?" });
+                return NotFound(new { Message = "User not found" });
 
             if (!PasswordHasher.VerifyPassword(authObj.Password, auth.Password))
             {
-                return BadRequest(new { Message = "Password is Incorrect" });
+                return BadRequest(new { Message = "Incorrect password" });
             }
 
             auth.Token = CreateJwt(auth);
 
             return Ok(new
             {
-                Token = auth.Token,
+                auth.Token,
                 Message = "Login success!"
             });
         }
@@ -52,7 +53,8 @@ namespace BISP_API.Controllers
         public async Task<IActionResult> RegisterUser([FromBody] User authObj)
         {
             if (authObj == null)
-                return BadRequest();
+                return BadRequest(new { Message = "Request body is missing" });
+
 
             // check email
             if (await CheckEmailExistAsync(authObj.Email))
@@ -70,22 +72,28 @@ namespace BISP_API.Controllers
             authObj.Token = "";
             await _userContext.AddAsync(authObj);
             await _userContext.SaveChangesAsync();
+
+            authObj.Token = CreateJwt(authObj);
+
+
             return Ok(new
             {
                 Status = 200,
-                Message = "User Added!"
+                Message = "User Added!",
+                authObj.Token,
+
             });
         }
 
-        private Task<bool> CheckEmailExistAsync(string? email)
+        private Task<bool> CheckEmailExistAsync(string email)
              => _userContext.Users.AnyAsync(x => x.Email == email);
 
-        private Task<bool> CheckUsernameExistAsync(string? username)
+        private Task<bool> CheckUsernameExistAsync(string username)
             => _userContext.Users.AnyAsync(x => x.Username == username);
 
         private static string CheckPasswordStrength(string pass)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             if (pass.Length < 9)
                 sb.Append("Minimum password length should be 8" + Environment.NewLine);
             if (!Regex.IsMatch(pass, "[<,>,@,!,#,$,%,^,&,*,(,),_,+,\\[,\\],{,},?,:,;,|,',\\,.,/,~,`,-,=]"))
@@ -100,7 +108,8 @@ namespace BISP_API.Controllers
             var identity = new ClaimsIdentity(new Claim[]
             {
                 new Claim(ClaimTypes.Role, auth.Role),
-                new Claim(ClaimTypes.Name,$"{auth.Username}")
+                new Claim(ClaimTypes.Name,$"{auth.Username}"),
+
             });
 
             var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
@@ -113,7 +122,12 @@ namespace BISP_API.Controllers
             };
             var token = jwtTokenHandler.CreateToken(tokenDescriptor);
             return jwtTokenHandler.WriteToken(token);
+        }
 
+        [HttpGet]
+        public async Task<ActionResult<User>> GetAllUsers()
+        {
+            return Ok(await _userContext.Users.ToListAsync());
         }
     }
 

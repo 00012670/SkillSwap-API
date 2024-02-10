@@ -1,8 +1,10 @@
 ﻿using BISP_API.Context;
+using BISP_API.Helper;
 using BISP_API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.VisualBasic;
+using System;
 
 namespace BISP_API.Controllers
 {
@@ -15,31 +17,80 @@ namespace BISP_API.Controllers
         public SkillsController(BISPdbContext dbContext, IWebHostEnvironment environment)
         {
             _dbContext = dbContext;
+
         }
 
         [HttpGet]
+        [Route("GetAllSkills")]
         public async Task<IActionResult> GetAllSkills()
         {
-            var skills = await _dbContext.Skills.ToListAsync();
+            var skills = await _dbContext.Skills.Include(s => s.User).ToListAsync();
             return Ok(skills);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddSkill([FromBody] Skill skillRequest)
+        [HttpGet]
+        [Route("GetSkillsByUserId/{userId}")]
+        public async Task<IActionResult> GetSkillsByUserId([FromRoute] int userId)
         {
-            _dbContext.Skills.Add(skillRequest);
-            skillRequest.Level = (SkillLevel)Enum.Parse(typeof(SkillLevel), skillRequest.Level.ToString(), true);
+            var user = await _dbContext.Users.Include(u => u.Skills).FirstOrDefaultAsync(u => u.UserId == userId);
 
-            await _dbContext.SaveChangesAsync();
+            if (user == null)
+            {
+                return NotFound();
+            }
 
-            return Ok(skillRequest);
+            return Ok(user.Skills);
         }
 
+
+        [HttpPost]
+        [Route("AddSkillToUser/{userId}")]
+        public async Task<IActionResult> AddSkillToUser([FromRoute] int userId, [FromBody] Skill addSkillRequest)
+        {
+            var user = await _dbContext.Users.Include(u => u.Skills).FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            addSkillRequest.User = user;
+            _dbContext.Skills.Add(addSkillRequest);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(addSkillRequest);
+        }
+
+        [HttpDelete]
+        [Route("RemoveSkillFromUser/{userId}/{skillId}")]
+        public async Task<IActionResult> RemoveSkillFromUser([FromRoute] int userId, [FromRoute] int skillId)
+        {
+            var user = await _dbContext.Users.Include(u => u.Skills).FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var skill = user.Skills.FirstOrDefault(s => s.SkillId == skillId);
+
+            if (skill == null)
+            {
+                return NotFound();
+            }
+
+            user.Skills.Remove(skill);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(skill);
+        }
+
+
         [HttpGet]
-        [Route("{id}")]
+        [Route("GetSkillBy/{id}")]
         public async Task<IActionResult> GetSkillbyId([FromRoute] int id)
         {
-            var skill = await _dbContext.Skills.FirstOrDefaultAsync(x => x.Id == id);
+            var skill = await _dbContext.Skills.FirstOrDefaultAsync(x => x.SkillId == id);
 
             if (skill == null)
             {
@@ -50,7 +101,7 @@ namespace BISP_API.Controllers
         }
 
         [HttpPut]
-        [Route("{id}")]
+        [Route("UpdateSkillBy{id}")]
         public async Task<IActionResult> UpdateSkill([FromRoute] int id, Skill updateSkillRequest)
         {
             var skill = await _dbContext.Skills.FindAsync(id);
@@ -86,5 +137,6 @@ namespace BISP_API.Controllers
 
             return Ok(skill);
         }
+
     }
 }

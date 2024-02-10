@@ -109,7 +109,7 @@ namespace BISP_API.Controllers
             {
                 new Claim(ClaimTypes.Role, auth.Role),
                 new Claim(ClaimTypes.Name,$"{auth.Username}"),
-
+                new Claim("userId", $"{auth.UserId}") 
             });
 
             var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
@@ -125,9 +125,10 @@ namespace BISP_API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<User>> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
-            return Ok(await _userContext.Users.ToListAsync());
+            var users = await _userContext.Users.Include(u => u.Skills).ToListAsync();
+            return Ok(users);
         }
     }
 

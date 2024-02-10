@@ -21,13 +21,13 @@ namespace BISP_API.Controllers
 
         }
 
-
-
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult> GetProfilebyId([FromRoute] int id)
         {
-            var profile = await _profileContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            var profile = await _profileContext.Users
+                .Include(u => u.Skills)
+                .FirstOrDefaultAsync(x => x.UserId == id);
 
             if (profile == null)
             {
@@ -37,9 +37,7 @@ namespace BISP_API.Controllers
             return Ok(profile);
         }
 
-
-
-        [HttpPost()]
+        [HttpPut()]
         [Route("{id}")]
         public async Task<IActionResult> UpdateProfile([FromRoute] int id, User updateProfileRequest)
         {

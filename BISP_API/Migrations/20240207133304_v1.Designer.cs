@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BISP_API.Migrations
 {
     [DbContext(typeof(BISPdbContext))]
-    [Migration("20240116075608_v1")]
+    [Migration("20240207133304_v1")]
     partial class v1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,11 +50,11 @@ namespace BISP_API.Migrations
 
             modelBuilder.Entity("BISP_API.Models.Skill", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("SkillId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SkillId"), 1L, 1);
 
                     b.Property<string>("Category")
                         .HasColumnType("nvarchar(max)");
@@ -71,18 +71,23 @@ namespace BISP_API.Migrations
                     b.Property<string>("Prerequisity")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("SkillId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Skills");
                 });
 
             modelBuilder.Entity("BISP_API.Models.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"), 1L, 1);
 
                     b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
@@ -108,9 +113,25 @@ namespace BISP_API.Migrations
                     b.Property<string>("Username")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserId");
 
                     b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("BISP_API.Models.Skill", b =>
+                {
+                    b.HasOne("BISP_API.Models.User", "User")
+                        .WithMany("Skills")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BISP_API.Models.User", b =>
+                {
+                    b.Navigation("Skills");
                 });
 #pragma warning restore 612, 618
         }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BISP_API.Migrations
 {
     [DbContext(typeof(BISPdbContext))]
-    [Migration("20240207133304_v1")]
+    [Migration("20240211125739_v1")]
     partial class v1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,24 +26,22 @@ namespace BISP_API.Migrations
 
             modelBuilder.Entity("BISP_API.Models.Image", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ImgId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ImgId"), 1L, 1);
 
                     b.Property<byte[]>("Img")
-                        .HasColumnType("image")
-                        .HasColumnName("Image");
+                        .HasColumnType("varbinary(max)");
 
-                    b.Property<string>("Imgcode")
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("ImgCode");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("ImgId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Images");
                 });
@@ -118,6 +116,17 @@ namespace BISP_API.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("BISP_API.Models.Image", b =>
+                {
+                    b.HasOne("BISP_API.Models.User", "User")
+                        .WithOne("ProfileImage")
+                        .HasForeignKey("BISP_API.Models.Image", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("BISP_API.Models.Skill", b =>
                 {
                     b.HasOne("BISP_API.Models.User", "User")
@@ -131,6 +140,8 @@ namespace BISP_API.Migrations
 
             modelBuilder.Entity("BISP_API.Models.User", b =>
                 {
+                    b.Navigation("ProfileImage");
+
                     b.Navigation("Skills");
                 });
 #pragma warning restore 612, 618

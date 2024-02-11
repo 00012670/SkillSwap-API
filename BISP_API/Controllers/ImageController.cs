@@ -2,6 +2,7 @@
 using BISP_API.Helper;
 using BISP_API.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BISP_API.Controllers
 {
@@ -18,50 +19,38 @@ namespace BISP_API.Controllers
             hostingEnv = environment;
 
         }
-        [HttpGet("GetImage")]
-        public async Task<IActionResult> GetImage(string imgId)
-        {
-            string Imageurl = string.Empty;
-            string hosturl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
-            try
-            {
-                string Filepath = GetFilePath(imgId);
-                string imagepath = Filepath + "\\" + imgId + ".png";
-                if (System.IO.File.Exists(imagepath))
-                {
-                    Imageurl = hosturl + "/Uploads/SKill/" + imgId + "/" + imgId + ".png";
-                }
-                else
-                {
-                    return NotFound();
-                }
-            }
-            catch (Exception)
-            {
-            }
-            return Ok(Imageurl);
-        }
 
-
-
-        [HttpPost("UploadImage")]
-        public async Task<ActionResult> UploadImage(IFormFile formFile, string imgId)
+        [HttpPost("UploadImage/{userId}")]
+        public async Task<ActionResult> UploadImage(IFormFile formFile, int userId)
         {
             APIResponse response = new();
             try
             {
-                string Filepath = GetFilePath(imgId);
-                if (!System.IO.Directory.Exists(Filepath))
+                var user = _dbContext.Users.Include(u => u.ProfileImage).FirstOrDefault(u => u.UserId == userId);
+                if (user == null)
                 {
-                    System.IO.Directory.CreateDirectory(Filepath);
+                    return NotFound("User not found");
                 }
-                string imagepath = Filepath + "\\" + imgId + ".png";
-                if (System.IO.File.Exists(imagepath))
-                {
-                    System.IO.File.Delete(imagepath);
-                }
-                using FileStream stream = System.IO.File.Create(imagepath);
+
+                using MemoryStream stream = new();
                 await formFile.CopyToAsync(stream);
+                if (user.ProfileImage != null)
+                {
+                    user.ProfileImage.Img = stream.ToArray();
+                    response.Message = "Image updated successfully";
+                }
+                else
+                {
+                    var image = new Image()
+                    {
+                        Img = stream.ToArray(),
+                        UserId = userId
+                    };
+                    this._dbContext.Images.Add(image);
+                    user.ProfileImage = image;
+                    response.Message = "Image uploaded successfully";
+                }
+                await this._dbContext.SaveChangesAsync();
                 response.ResponseCode = 200;
                 response.Result = "pass";
             }
@@ -73,17 +62,15 @@ namespace BISP_API.Controllers
         }
 
 
-        [HttpDelete("RemoveImage")]
-        public async Task<IActionResult> RemoveImage(string imgId)
+        [HttpGet("GetImageByUserId/{userId}")]
+        public async Task<IActionResult> GetImageByUserId(int userId)
         {
             try
             {
-                string Filepath = GetFilePath(imgId);
-                string Imagepath = Filepath + "\\" + imgId + ".png";
-                if (System.IO.File.Exists(Imagepath))
+                var user = this._dbContext.Users.Include(u => u.ProfileImage).FirstOrDefault(u => u.UserId == userId);
+                if (user != null && user.ProfileImage != null)
                 {
-                    System.IO.File.Delete(Imagepath);
-                    return Ok("pass");
+                    return File(user.ProfileImage.Img, "image/png");
                 }
                 else
                 {
@@ -97,72 +84,29 @@ namespace BISP_API.Controllers
         }
 
 
-        [HttpGet("GetDBImage")]
-        public async Task<IActionResult> GetDBImage(string imgcode)
+        [HttpDelete("RemoveImage/{userId}")]
+        public async Task<IActionResult> RemoveImage(int userId)
         {
-            List<string> Imageurl = new();
             try
             {
-                var _productimage = this._dbContext.Images.Where(item => item.Imgcode == imgcode).ToList();
-                if (_productimage != null && _productimage.Count > 0)
+                var user = this._dbContext.Users.Include(u => u.ProfileImage).FirstOrDefault(u => u.UserId == userId);
+                if (user != null && user.ProfileImage != null)
                 {
-                    _productimage.ForEach(item =>
-                    {
-                        Imageurl.Add(Convert.ToBase64String(item.Img));
-                    });
+                    _dbContext.Images.Remove(user.ProfileImage);
+                    user.ProfileImage = null;
+                    await _dbContext.SaveChangesAsync();
+                    return Ok("pass");
                 }
                 else
                 {
                     return NotFound();
                 }
-
             }
             catch (Exception)
             {
+                return NotFound();
             }
-            return Ok(Imageurl);
-
         }
 
-
-        [HttpPut("DBUploadImage")]
-        public async Task<IActionResult> DBMUploadImage(IFormFileCollection filecollection, string imgoCode)
-        {
-            APIResponse response = new();
-            int passcount = 0; int errorcount = 0;
-            try
-            {
-                foreach (var file in filecollection)
-                {
-                    using MemoryStream stream = new();
-                    await file.CopyToAsync(stream);
-                    this._dbContext.Images.Add(new Image()
-                    {
-                        Imgcode = imgoCode,
-                        Img = stream.ToArray()
-                    });
-                    await this._dbContext.SaveChangesAsync();
-                    passcount++;
-                }
-
-
-            }
-            catch (Exception ex)
-            {
-                errorcount++;
-                response.Message = ex.Message;
-            }
-            response.ResponseCode = 200;
-            response.Result = passcount + " Files uploaded & " + errorcount + " files failed";
-            return Ok(response);
-        }
-
-
-
-        [NonAction]
-        public string GetFilePath(string imgId)
-        {
-            return this.hostingEnv.WebRootPath + "\\Uploads\\Skill\\" + imgId;
-        }
     }
 }

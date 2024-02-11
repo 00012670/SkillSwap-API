@@ -8,16 +8,10 @@ namespace BISP_API.Models
     public class Image
     {
         [Key]
-        [Column("id")]
-        public int Id { get; set; }
-
-        [Column("ImgCode")]
-        [StringLength(50)]
-        [Unicode(false)]
-        public string Imgcode { get; set; }
-
-        [Column("Image", TypeName = "image")]
+        public int ImgId { get; set; }
         public byte[] Img { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; }
 
     }
 }

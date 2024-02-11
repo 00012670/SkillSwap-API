@@ -26,6 +26,8 @@ namespace BISP_API.Models
 
         public string Role { get; set; }
 
+        public Image ProfileImage { get; set; }
+
         public ICollection<Skill> Skills { get; set; }
 
     }

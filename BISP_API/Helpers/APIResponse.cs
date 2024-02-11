@@ -1,4 +1,4 @@
-﻿namespace BISP_API.Helper
+﻿namespace BISP_API.Helpers
 {
     public class APIResponse
     {

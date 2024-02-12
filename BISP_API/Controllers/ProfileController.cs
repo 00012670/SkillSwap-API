@@ -55,5 +55,20 @@ namespace BISP_API.Controllers
 
             return Ok(profile);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProfile([FromRoute] int id)
+        {
+            var profile = await _profileContext.Users.FindAsync(id);
+            if (profile == null)
+            {
+                return NotFound();
+            }
+
+            _profileContext.Users.Remove(profile);
+            await _profileContext.SaveChangesAsync();
+
+            return Ok(profile);
+        }
     }
 }

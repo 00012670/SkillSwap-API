@@ -134,3 +134,7 @@ C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\obj\Debug\net6.0\BISP_API.genrunt
 C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\obj\Debug\net6.0\ref\BISP_API.dll
 C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\BISP_API.staticwebassets.runtime.json
 C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\obj\Debug\net6.0\BISP_API.sourcelink.json
+C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\Microsoft.AspNetCore.JsonPatch.dll
+C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
+C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\Newtonsoft.Json.dll
+C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\Newtonsoft.Json.Bson.dll

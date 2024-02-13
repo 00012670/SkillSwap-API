@@ -10,7 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+    ); 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -18,10 +21,10 @@ builder.Services.AddCors(o =>
 {
     o.AddPolicy("MyPolicy", builder =>
     {
-        builder.WithOrigins("http://localhost:4200")
-       // builder.AllowAnyOrigin()
+        // builder.WithOrigins("http://localhost:4200")
+        builder.AllowAnyOrigin()
        .AllowAnyMethod()
-        .AllowAnyHeader();
+       .AllowAnyHeader();
     });
 });
 

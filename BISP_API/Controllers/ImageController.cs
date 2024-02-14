@@ -95,7 +95,7 @@ namespace BISP_API.Controllers
                     _dbContext.Images.Remove(user.ProfileImage);
                     user.ProfileImage = null;
                     await _dbContext.SaveChangesAsync();
-                    return Ok("pass");
+                    return NoContent();
                 }
                 else
                 {

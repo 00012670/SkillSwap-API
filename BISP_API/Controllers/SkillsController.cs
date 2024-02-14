@@ -110,5 +110,20 @@ namespace BISP_API.Controllers
             return Ok(user.Skills);
         }
 
+        [HttpGet]
+        [Route("GetSkillAndUserBy/{id}")]
+        public async Task<IActionResult> GetSkillAndUserById([FromRoute] int id)
+        {
+            var skill = await _dbContext.Skills.Include(s => s.User).FirstOrDefaultAsync(s => s.SkillId == id);
+
+            if (skill == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(skill);
+        }
+
+
     }
 }

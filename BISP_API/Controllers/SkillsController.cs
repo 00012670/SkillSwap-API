@@ -11,7 +11,7 @@ namespace BISP_API.Controllers
     {
         private readonly BISPdbContext _dbContext;
 
-        public SkillsController(BISPdbContext dbContext, IWebHostEnvironment environment)
+        public SkillsController(BISPdbContext dbContext)
         {
             _dbContext = dbContext;
 

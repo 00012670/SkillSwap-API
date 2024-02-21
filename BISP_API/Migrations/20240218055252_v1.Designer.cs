@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BISP_API.Migrations
 {
     [DbContext(typeof(BISPdbContext))]
-    [Migration("20240211125739_v1")]
+    [Migration("20240218055252_v1")]
     partial class v1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,6 +79,45 @@ namespace BISP_API.Migrations
                     b.ToTable("Skills");
                 });
 
+            modelBuilder.Entity("BISP_API.Models.SwapRequest", b =>
+                {
+                    b.Property<int>("RequestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RequestId"), 1L, 1);
+
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("InitiatorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SkillOfferedId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SkillRequestedId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusRequest")
+                        .HasColumnType("int");
+
+                    b.HasKey("RequestId");
+
+                    b.HasIndex("InitiatorId");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SkillOfferedId");
+
+                    b.HasIndex("SkillRequestedId");
+
+                    b.ToTable("SwapRequests");
+                });
+
             modelBuilder.Entity("BISP_API.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -138,11 +177,57 @@ namespace BISP_API.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BISP_API.Models.SwapRequest", b =>
+                {
+                    b.HasOne("BISP_API.Models.User", "Initiator")
+                        .WithMany("SwapRequestsInitiated")
+                        .HasForeignKey("InitiatorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("BISP_API.Models.User", "Receiver")
+                        .WithMany("SwapRequestsReceived")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("BISP_API.Models.Skill", "SkillOffered")
+                        .WithMany("SwapRequestsOffered")
+                        .HasForeignKey("SkillOfferedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("BISP_API.Models.Skill", "SkillRequested")
+                        .WithMany("SwapRequestsExchanged")
+                        .HasForeignKey("SkillRequestedId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Initiator");
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("SkillOffered");
+
+                    b.Navigation("SkillRequested");
+                });
+
+            modelBuilder.Entity("BISP_API.Models.Skill", b =>
+                {
+                    b.Navigation("SwapRequestsExchanged");
+
+                    b.Navigation("SwapRequestsOffered");
+                });
+
             modelBuilder.Entity("BISP_API.Models.User", b =>
                 {
                     b.Navigation("ProfileImage");
 
                     b.Navigation("Skills");
+
+                    b.Navigation("SwapRequestsInitiated");
+
+                    b.Navigation("SwapRequestsReceived");
                 });
 #pragma warning restore 612, 618
         }

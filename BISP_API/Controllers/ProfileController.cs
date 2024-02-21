@@ -11,13 +11,10 @@ namespace BISP_API.Controllers
     public class ProfileController : Controller
     {
         private readonly BISPdbContext _profileContext;
-        private readonly IWebHostEnvironment hostingEnv;
 
-        public ProfileController(BISPdbContext dbContext, IWebHostEnvironment environment)
+        public ProfileController(BISPdbContext dbContext)
         {
             _profileContext = dbContext;
-            hostingEnv = environment;
-
         }
 
         [HttpGet]

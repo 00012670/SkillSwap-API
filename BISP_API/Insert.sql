@@ -38,43 +38,26 @@ GO
 
 
 
-CREATE TABLE Habits (
-    ID INT IDENTITY PRIMARY KEY,
-    Name VARCHAR(255),
-    Frequency INT,
-    Repeat INT,
-    StartDate DATE
-);
-
-CREATE TABLE Progresses (
-    ID INT IDENTITY PRIMARY KEY, 
-    HabitID INT,
-    HabitProgress INT,
-    IsCompleted BIT,
-    Note TEXT,
-    EndDate DATE,
-    FOREIGN KEY (HabitID) REFERENCES Habits (ID)
-);
-
-
 
 /*******************************************************************************
    Populate Tables
 ********************************************************************************/
 
 
-INSERT INTO [Habits] ([Name], [Frequency], [Repeat], [StartDate])
-VALUES 
-('Exercise', 5, 1, '2023-10-25'),
-('Reading', 3, 2, '2023-10-26'),
-('Running', 4, 1, '2023-10-25')
+-- Insert into User table
+INSERT INTO Users (Username, Email, Password, FullName, Bio, SkillInterested, Token, Role)
+VALUES ('user1', 'user1@example.com', '12345678!', 'User One', 'Bio for user1', 'Skill1', '', 'Admin'),
+       ('user2', 'user2@example.com', '12345678!', 'User Two', 'Bio for user2', 'Skill2', '', 'User'),
+       ('user3', 'user3@example.com', '12345678!', 'User Three', 'Bio for user3', 'Skill3', '', 'User');
 
 
-INSERT INTO [Progresses] ([HabitID], [HabitProgress], [IsCompleted], [Note], [EndDate])
-VALUES 
-(1,  100, 1, 'Feeling great!', '2023-10-29'),
-(2, 50, 1, 'Finished a book!', '2023-10-27'),
-(3, 80, 1, 'Improved my pace', '2023-10-28')
+-- Insert into Skill table
+INSERT INTO Skills (Name, Description, Category, Level, Prerequisity, UserId)
+VALUES ('skill1', 'Description for Skill1', 'Category1', 0, 'Prerequisity for Skill1', 1),
+       ('skill2', 'Description for Skill2', 'Category2', 1, 'Prerequisity for Skill2', 2),
+       ('skill3', 'Description for Skill3', 'Category3', 2, 'Prerequisity for Skill3', 3);
+
+
 
 
 /*******************************************************************************

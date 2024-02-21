@@ -9,7 +9,11 @@
         public SkillLevel Level { get; set; }
         public string Prerequisity { get; set; }
         public int UserId { get; set; }  
-        public User User { get; set; }  
+        public User User { get; set; }
+
+
+        public ICollection<SwapRequest> SwapRequestsOffered { get; set; }
+        public ICollection<SwapRequest> SwapRequestsExchanged { get; set; }
 
     }
 

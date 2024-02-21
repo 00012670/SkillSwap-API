@@ -28,7 +28,14 @@ namespace BISP_API.Models
 
         public Image ProfileImage { get; set; }
 
+        public bool HasImage { get; set; }
+
         public ICollection<Skill> Skills { get; set; }
+
+        public ICollection<SwapRequest> SwapRequestsInitiated { get; set; }
+
+        public ICollection<SwapRequest> SwapRequestsReceived { get; set; }
+
 
     }
 }

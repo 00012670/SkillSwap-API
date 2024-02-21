@@ -11,13 +11,9 @@ namespace BISP_API.Controllers
     public class ImageController: ControllerBase
     {
         private readonly BISPdbContext _dbContext;
-        private readonly IWebHostEnvironment hostingEnv;
-
-        public ImageController(BISPdbContext dbContext, IWebHostEnvironment environment)
+        public ImageController(BISPdbContext dbContext)
         {
             _dbContext = dbContext;
-            hostingEnv = environment;
-
         }
 
         [HttpPost("UploadImage/{userId}")]
@@ -37,6 +33,7 @@ namespace BISP_API.Controllers
                 if (user.ProfileImage != null)
                 {
                     user.ProfileImage.Img = stream.ToArray();
+                    user.HasImage = true;
                     response.Message = "Image updated successfully";
                 }
                 else
@@ -48,6 +45,7 @@ namespace BISP_API.Controllers
                     };
                     this._dbContext.Images.Add(image);
                     user.ProfileImage = image;
+                    user.HasImage = true;
                     response.Message = "Image uploaded successfully";
                 }
                 await this._dbContext.SaveChangesAsync();
@@ -94,6 +92,7 @@ namespace BISP_API.Controllers
                 {
                     _dbContext.Images.Remove(user.ProfileImage);
                     user.ProfileImage = null;
+                    user.HasImage = false;
                     await _dbContext.SaveChangesAsync();
                     return NoContent();
                 }

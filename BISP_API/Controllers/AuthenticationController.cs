@@ -45,7 +45,7 @@ namespace BISP_API.Controllers
             return Ok(new
             {
                 auth.Token,
-                Message = "Login success!"
+                Message = "Login successful!"
             });
         }
 

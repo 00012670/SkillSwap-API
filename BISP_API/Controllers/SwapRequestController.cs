@@ -38,14 +38,71 @@ namespace BISP_API.Controllers
             return Ok(swapRequest);
         }
 
-        [HttpGet("GetSwapRequests")]
+        [HttpGet("ReceiveSwapRequests")]
         public async Task<IActionResult> GetSwapRequests(int userId)
         {
             var swapRequests = await _dbContext.SwapRequests
-                .Where(sr => sr.InitiatorId == userId || sr.ReceiverId == userId)
+                .Where(sr => sr.ReceiverId == userId)
+                .Select(sr => new
+                {
+                    sr.RequestId,
+                    sr.InitiatorId,
+                    InitiatorName = sr.Initiator.Username,
+                    sr.ReceiverId,
+                    ReceiverName = sr.Receiver.Username,
+                    sr.SkillOfferedId,
+                    SkillOfferedName = sr.SkillOffered.Name,
+                    sr.SkillRequestedId,
+                    SkillRequestedName = sr.SkillRequested.Name,
+                    sr.Details,
+                    sr.StatusRequest
+                })
                 .ToListAsync();
+
             return Ok(swapRequests);
         }
+
+
+        [HttpGet("GetSentSwapRequests")]
+        public async Task<IActionResult> GetSentSwapRequests(int userId)
+        {
+            var sentSwapRequests = await _dbContext.SwapRequests
+                .Where(sr => sr.InitiatorId == userId)
+                .Select(sr => new
+                {
+                    sr.RequestId,
+                    sr.InitiatorId,
+                    InitiatorName = sr.Initiator.Username,
+                    sr.ReceiverId,
+                    ReceiverName = sr.Receiver.Username,
+                    sr.SkillOfferedId,
+                    SkillOfferedName = sr.SkillOffered.Name,
+                    sr.SkillRequestedId,
+                    SkillRequestedName = sr.SkillRequested.Name,
+                    sr.Details,
+                    sr.StatusRequest
+                })
+                .ToListAsync();
+
+            return Ok(sentSwapRequests);
+        }
+
+        [HttpGet("GetBySkillId/{skillId}")]
+        public async Task<IActionResult> GetBySkillId(int skillId)
+        {
+            var swapRequests = await _dbContext.SwapRequests
+                .Where(sr => sr.SkillOfferedId == skillId || sr.SkillRequestedId == skillId)
+                .ToListAsync();
+
+            if (swapRequests == null || swapRequests.Count == 0)
+            {
+                return NotFound();
+            }
+
+            return Ok(swapRequests);
+        }
+
+
 
         [HttpPut("UpdateSwapRequest/{requestId}")]
         public async Task<IActionResult> UpdateSwapRequest(int requestId, [FromBody] SwapRequest updatedSwapRequest)
@@ -57,9 +114,26 @@ namespace BISP_API.Controllers
             }
 
             swapRequest.StatusRequest = updatedSwapRequest.StatusRequest;
+
             await _dbContext.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpDelete("DeleteSwapRequest/{requestId}")]
+        public async Task<IActionResult> DeleteSwapRequest(int requestId)
+        {
+            var swapRequest = await _dbContext.SwapRequests.FindAsync(requestId);
+            if (swapRequest == null)
+            {
+                return NotFound();
+            }
+
+            _dbContext.SwapRequests.Remove(swapRequest);
+            await _dbContext.SaveChangesAsync();
+            return NoContent();
+        }
+
+
 
     }
 }

@@ -30,12 +30,18 @@ namespace BISP_API.Models
 
         public bool HasImage { get; set; }
 
+        public string RefreshToken { get; set; }
+
+        public DateTime RefreshTokenExpiryTime { get; set; }
+
         public ICollection<Skill> Skills { get; set; }
 
         public ICollection<SwapRequest> SwapRequestsInitiated { get; set; }
 
         public ICollection<SwapRequest> SwapRequestsReceived { get; set; }
 
+        public ICollection<Review> ReviewsSent { get; set; }
 
+        public ICollection<Review> ReviewsReceived { get; set; }
     }
 }

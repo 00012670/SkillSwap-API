@@ -4,6 +4,7 @@ using BISP_API.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BISP_API.Migrations
 {
     [DbContext(typeof(BISPdbContext))]
-    partial class BISPdbContextModelSnapshot : ModelSnapshot
+    [Migration("20240225183318_addedRefreshToken")]
+    partial class addedRefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,45 +44,6 @@ namespace BISP_API.Migrations
                         .IsUnique();
 
                     b.ToTable("Images");
-                });
-
-            modelBuilder.Entity("BISP_API.Models.Review", b =>
-                {
-                    b.Property<int>("ReviewId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewId"), 1L, 1);
-
-                    b.Property<int>("FromUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RequestId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SkillId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Text")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ToUserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ReviewId");
-
-                    b.HasIndex("FromUserId");
-
-                    b.HasIndex("RequestId");
-
-                    b.HasIndex("SkillId");
-
-                    b.HasIndex("ToUserId");
-
-                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("BISP_API.Models.Skill", b =>
@@ -212,41 +175,6 @@ namespace BISP_API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BISP_API.Models.Review", b =>
-                {
-                    b.HasOne("BISP_API.Models.User", "FromUser")
-                        .WithMany("ReviewsSent")
-                        .HasForeignKey("FromUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("BISP_API.Models.SwapRequest", "Request")
-                        .WithMany("Reviews")
-                        .HasForeignKey("RequestId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("BISP_API.Models.Skill", "Skill")
-                        .WithMany("Reviews")
-                        .HasForeignKey("SkillId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("BISP_API.Models.User", "ToUser")
-                        .WithMany("ReviewsReceived")
-                        .HasForeignKey("ToUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("FromUser");
-
-                    b.Navigation("Request");
-
-                    b.Navigation("Skill");
-
-                    b.Navigation("ToUser");
-                });
-
             modelBuilder.Entity("BISP_API.Models.Skill", b =>
                 {
                     b.HasOne("BISP_API.Models.User", "User")
@@ -295,25 +223,14 @@ namespace BISP_API.Migrations
 
             modelBuilder.Entity("BISP_API.Models.Skill", b =>
                 {
-                    b.Navigation("Reviews");
-
                     b.Navigation("SwapRequestsExchanged");
 
                     b.Navigation("SwapRequestsOffered");
                 });
 
-            modelBuilder.Entity("BISP_API.Models.SwapRequest", b =>
-                {
-                    b.Navigation("Reviews");
-                });
-
             modelBuilder.Entity("BISP_API.Models.User", b =>
                 {
                     b.Navigation("ProfileImage");
-
-                    b.Navigation("ReviewsReceived");
-
-                    b.Navigation("ReviewsSent");
 
                     b.Navigation("Skills");
 

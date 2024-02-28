@@ -96,7 +96,7 @@ namespace BISP_API.Controllers
 
             if (swapRequests == null || swapRequests.Count == 0)
             {
-                return NotFound();
+                return Ok(new List<SwapRequest>());
             }
 
             return Ok(swapRequests);
@@ -119,6 +119,8 @@ namespace BISP_API.Controllers
             return NoContent();
         }
 
+
+
         [HttpDelete("DeleteSwapRequest/{requestId}")]
         public async Task<IActionResult> DeleteSwapRequest(int requestId)
         {
@@ -135,5 +137,19 @@ namespace BISP_API.Controllers
 
 
 
+        //[HttpDelete("DeleteSwapRequest/{requestId}")]
+        //public async Task<IActionResult> DeleteSwapRequest(int requestId)
+        //{
+        //    var swapRequest = await _dbContext.SwapRequests.FindAsync(requestId);
+        //    if (swapRequest == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    // Instead of removing the swapRequest, set IsDeleted to true
+        //    swapRequest.IsDeleted = true;
+        //    await _dbContext.SaveChangesAsync();
+        //    return NoContent();
+        //}
     }
 }

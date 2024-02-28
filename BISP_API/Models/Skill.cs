@@ -14,6 +14,8 @@
 
         public ICollection<SwapRequest> SwapRequestsOffered { get; set; }
         public ICollection<SwapRequest> SwapRequestsExchanged { get; set; }
+        public ICollection<Review> Reviews { get; set; }
+
 
     }
 

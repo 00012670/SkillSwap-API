@@ -8,6 +8,8 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using BISP_API.Models.Dto;
 
 
 namespace BISP_API.Controllers
@@ -16,12 +18,13 @@ namespace BISP_API.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        private readonly BISPdbContext _userContext;
+        private readonly BISPdbContext _authContext;
 
         public AuthenticationController(BISPdbContext appDbContext)
         {
-            _userContext = appDbContext;
+            _authContext = appDbContext;
         }
+
 
         [HttpPost("authenticate")]
         public async Task<IActionResult> Authenticate([FromBody] User authObj)
@@ -30,7 +33,7 @@ namespace BISP_API.Controllers
                 return BadRequest(new { Message = "Request body is missing" });
 
 
-            var auth = await _userContext.Users
+            var auth = await _authContext.Users
                 .FirstOrDefaultAsync(x => x.Username == authObj.Username);
             if (auth == null)
                 return NotFound(new { Message = "User not found" });
@@ -41,13 +44,20 @@ namespace BISP_API.Controllers
             }
 
             auth.Token = CreateJwt(auth);
+            var newAccessToken = auth.Token;
+            var newRefreshToken = CreateRefreshToken();
+            auth.RefreshToken = newRefreshToken;
+            auth.RefreshTokenExpiryTime = DateTime.Now.AddDays(5);
+            await _authContext.SaveChangesAsync();
 
-            return Ok(new
+            return Ok(new TokenApiDto()
             {
-                auth.Token,
-                Message = "Login successful!"
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken
             });
         }
+
+
 
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] User authObj)
@@ -70,8 +80,8 @@ namespace BISP_API.Controllers
             authObj.Password = PasswordHasher.HashPassword(authObj.Password);
             authObj.Role = "User";
             authObj.Token = "";
-            await _userContext.AddAsync(authObj);
-            await _userContext.SaveChangesAsync();
+            await _authContext.AddAsync(authObj);
+            await _authContext.SaveChangesAsync();
 
             authObj.Token = CreateJwt(authObj);
 
@@ -85,11 +95,13 @@ namespace BISP_API.Controllers
             });
         }
 
+
+
         private Task<bool> CheckEmailExistAsync(string email)
-             => _userContext.Users.AnyAsync(x => x.Email == email);
+             => _authContext.Users.AnyAsync(x => x.Email == email);
 
         private Task<bool> CheckUsernameExistAsync(string username)
-            => _userContext.Users.AnyAsync(x => x.Username == username);
+            => _authContext.Users.AnyAsync(x => x.Username == username);
 
         private static string CheckPasswordStrength(string pass)
         {
@@ -100,6 +112,8 @@ namespace BISP_API.Controllers
                 sb.Append("Password should contain special charcter" + Environment.NewLine);
             return sb.ToString();
         }
+
+
 
         private string CreateJwt(User auth)
         {
@@ -117,19 +131,81 @@ namespace BISP_API.Controllers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = identity,
-                Expires = DateTime.Now.AddDays(10),
+                Expires = DateTime.Now.AddSeconds(10),
                 SigningCredentials = credentials
             };
             var token = jwtTokenHandler.CreateToken(tokenDescriptor);
             return jwtTokenHandler.WriteToken(token);
         }
 
+
+
+        private string CreateRefreshToken()
+        {
+            var tokenBytes = RandomNumberGenerator.GetBytes(64);
+            var refreshToken = Convert.ToBase64String(tokenBytes);
+
+            var tokenInUser = _authContext.Users
+                .Any(a => a.RefreshToken == refreshToken);
+            if (tokenInUser)
+            {
+                return CreateRefreshToken();
+            }
+            return refreshToken;
+        }
+
+        private ClaimsPrincipal GetPrincipleFromExpiredToken(string token)
+        {
+            var key = Encoding.ASCII.GetBytes("veryverysceret.....");
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateLifetime = false
+            };
+            var tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken securityToken;
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+            var jwtSecurityToken = securityToken as JwtSecurityToken;
+            if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                throw new SecurityTokenException("This is Invalid Token");
+            return principal;
+
+        }
+
+
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _userContext.Users.Include(u => u.Skills).ToListAsync();
+            var users = await _authContext.Users.Include(u => u.Skills).ToListAsync();
             return Ok(users);
         }
-    }
 
+
+        [HttpPost("Refresh")]
+        public async Task<IActionResult> Refresh([FromBody] TokenApiDto tokenApiDto)
+        {
+            if (tokenApiDto is null)
+                return BadRequest("Invalid Client Request");
+            string accessToken = tokenApiDto.AccessToken;
+            string refreshToken = tokenApiDto.RefreshToken;
+            var principal = GetPrincipleFromExpiredToken(accessToken);
+            var username = principal.Identity.Name;
+            var user = await _authContext.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
+                return BadRequest("Invalid Request");
+            var newAccessToken = CreateJwt(user);
+            var newRefreshToken = CreateRefreshToken();
+            user.RefreshToken = newRefreshToken;
+            await _authContext.SaveChangesAsync();
+            return Ok(new TokenApiDto()
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken,
+            });
+        }
+    }
 }
+

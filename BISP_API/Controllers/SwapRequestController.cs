@@ -14,6 +14,8 @@ namespace BISP_API.Controllers
             _dbContext = dbContext;
         }
 
+
+
         [HttpPost("CreateSwapRequest")]
         public async Task<IActionResult> CreateSwapRequest([FromBody] SwapRequest swapRequest)
         {
@@ -42,7 +44,7 @@ namespace BISP_API.Controllers
         public async Task<IActionResult> GetSwapRequests(int userId)
         {
             var swapRequests = await _dbContext.SwapRequests
-                .Where(sr => sr.ReceiverId == userId)
+                .Where(sr => sr.ReceiverId == userId && sr.IsDeleted == false)
                 .Select(sr => new
                 {
                     sr.RequestId,
@@ -67,7 +69,7 @@ namespace BISP_API.Controllers
         public async Task<IActionResult> GetSentSwapRequests(int userId)
         {
             var sentSwapRequests = await _dbContext.SwapRequests
-                .Where(sr => sr.InitiatorId == userId)
+                .Where(sr => sr.InitiatorId == userId && sr.IsDeleted == false)
                 .Select(sr => new
                 {
                     sr.RequestId,
@@ -86,6 +88,18 @@ namespace BISP_API.Controllers
 
             return Ok(sentSwapRequests);
         }
+
+
+        [HttpGet("GetAcceptedSwapRequests")]
+        public async Task<IActionResult> GetAcceptedSwapRequests(int userId)
+        {
+            var acceptedSwapRequests = await _dbContext.SwapRequests
+           .Where(sr => (sr.InitiatorId == userId || sr.ReceiverId == userId) && sr.StatusRequest == SwapRequest.Status.Accepted)
+                .ToListAsync();
+
+            return Ok(acceptedSwapRequests);
+        }
+
 
         [HttpGet("GetBySkillId/{skillId}")]
         public async Task<IActionResult> GetBySkillId(int skillId)
@@ -130,26 +144,9 @@ namespace BISP_API.Controllers
                 return NotFound();
             }
 
-            _dbContext.SwapRequests.Remove(swapRequest);
+            swapRequest.IsDeleted = true;
             await _dbContext.SaveChangesAsync();
             return NoContent();
         }
-
-
-
-        //[HttpDelete("DeleteSwapRequest/{requestId}")]
-        //public async Task<IActionResult> DeleteSwapRequest(int requestId)
-        //{
-        //    var swapRequest = await _dbContext.SwapRequests.FindAsync(requestId);
-        //    if (swapRequest == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    // Instead of removing the swapRequest, set IsDeleted to true
-        //    swapRequest.IsDeleted = true;
-        //    await _dbContext.SaveChangesAsync();
-        //    return NoContent();
-        //}
     }
 }

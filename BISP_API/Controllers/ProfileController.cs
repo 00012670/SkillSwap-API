@@ -33,6 +33,22 @@ namespace BISP_API.Controllers
             return Ok(profile);
         }
 
+        [HttpGet]
+        [Route("{id}/username")]
+        public async Task<ActionResult> GetUsername([FromRoute] int id)
+        {
+            var user = await _profileContext.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new { username = user.Username });
+        }
+
+
+
         [HttpPut()]
         [Route("{id}")]
         public async Task<IActionResult> UpdateProfile([FromRoute] int id, User updateProfileRequest)

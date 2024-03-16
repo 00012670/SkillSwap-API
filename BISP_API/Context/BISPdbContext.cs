@@ -16,7 +16,26 @@ namespace BISP_API.Context
         public DbSet<SwapRequest> SwapRequests { get; set; }
         public DbSet<Review> Reviews { get; set; }
 
+        public override int SaveChanges()
+        {
+            HandleSoftDelete();
+            return base.SaveChanges();
+        }
 
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            HandleSoftDelete();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
+        private void HandleSoftDelete()
+        {
+            foreach (var entry in ChangeTracker.Entries().Where(entry => entry.Entity is SwapRequest && entry.State == EntityState.Deleted))
+            {
+                entry.State = EntityState.Modified;
+                entry.CurrentValues["IsDeleted"] = true;
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -69,8 +88,6 @@ namespace BISP_API.Context
                 .WithMany(sr => sr.Reviews)
                 .HasForeignKey(r => r.RequestId)
                 .OnDelete(DeleteBehavior.NoAction);
-
-
 
         }
 

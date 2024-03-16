@@ -33,6 +33,7 @@ namespace BISP_API.Controllers
                 return BadRequest("Cannot create review for a SwapRequest that has not been accepted");
             }
 
+
             // Validate and add review to the database
             _dbContext.Reviews.Add(review);
             await _dbContext.SaveChangesAsync();
@@ -44,9 +45,9 @@ namespace BISP_API.Controllers
         [HttpGet("GetReviewsByUserId/{userId}")]
         public async Task<IActionResult> GetReviewsByUserId(int userId)
         {
-            // Fetch reviews written by or for the user
+            // Fetch reviews written for the user
             var reviews = await _dbContext.Reviews
-                .Where(r => r.FromUserId == userId || r.ToUserId == userId)
+                .Where(r => r.ToUserId == userId)
                 .Select(r => new
                 {
                     r.ReviewId,
@@ -65,41 +66,6 @@ namespace BISP_API.Controllers
         }
 
 
-        //[HttpGet("GetReviewByRequestId/{requestId}")]
-        //public async Task<IActionResult> GetReviewByRequestId(int requestId)
-        //{
-        //    // Fetch and return the review for the request
-        //    // ...
-
-        //    return Ok(review);
-        //}
-
-        [HttpPut("UpdateReview/{reviewId}")]
-        public async Task<IActionResult> UpdateReview(int reviewId, [FromBody] Review updatedReview)
-        {
-            var review = await _dbContext.Reviews.FindAsync(reviewId);
-            if (review == null)
-            {
-                return NotFound();
-            }
-
-            // Get the ID of the currently authenticated user
-            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            // Check if the current user is the one who created the review
-            if (review.FromUserId.ToString() != currentUserId)
-            {
-                return Forbid();
-            }
-
-            review.Rating = updatedReview.Rating;
-            review.Text = updatedReview.Text;
-
-            await _dbContext.SaveChangesAsync();
-
-            return NoContent();
-        }
-
         [HttpDelete("DeleteReview/{reviewId}")]
         public async Task<IActionResult> DeleteReview(int reviewId)
         {
@@ -109,19 +75,52 @@ namespace BISP_API.Controllers
                 return NotFound();
             }
 
-            // Get the ID of the currently authenticated user
-            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            // Check if the current user is the one who created the review
-            if (review.FromUserId.ToString() != currentUserId)
-            {
-                return Forbid();
-            }
-
             _dbContext.Reviews.Remove(review);
             await _dbContext.SaveChangesAsync();
 
             return NoContent();
         }
+
+
+        [HttpDelete("DeleteAllReviews")]
+        public async Task<IActionResult> DeleteAllReviews()
+        {
+            var reviews = await _dbContext.Reviews.ToListAsync();
+
+            _dbContext.Reviews.RemoveRange(reviews);
+            await _dbContext.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
+        //[HttpPut("UpdateReview/{reviewId}")]
+        //public async Task<IActionResult> UpdateReview(int reviewId, [FromBody] Review updatedReview)
+        //{
+        //    var review = await _dbContext.Reviews.FindAsync(reviewId);
+        //    if (review == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    // Get the ID of the currently authenticated user
+        //    var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        //    // Check if the current user is the one who created the review
+        //    if (review.FromUserId.ToString() != currentUserId)
+        //    {
+        //        return Forbid();
+        //    }
+
+        //    review.Rating = updatedReview.Rating;
+        //    review.Text = updatedReview.Text;
+
+        //    await _dbContext.SaveChangesAsync();
+
+        //    return NoContent();
+        //}
+
+
     }
 }
+

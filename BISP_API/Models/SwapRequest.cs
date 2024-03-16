@@ -20,8 +20,8 @@ namespace BISP_API.Models
         public Skill SkillRequested { get; set; }
 
         public string Details { get; set; }
-        // public bool IsDeleted { get; set; }
 
+        public bool IsDeleted { get; set; }
         public Status StatusRequest { get; set; }
         public ICollection<Review> Reviews { get; set; }
 

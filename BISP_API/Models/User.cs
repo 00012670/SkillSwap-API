@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Stripe;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BISP_API.Models
@@ -43,5 +44,7 @@ namespace BISP_API.Models
         public ICollection<Review> ReviewsSent { get; set; }
 
         public ICollection<Review> ReviewsReceived { get; set; }
+      //  public ICollection<PaymentMethod> PaymentMethods { get; set; }
+
     }
 }

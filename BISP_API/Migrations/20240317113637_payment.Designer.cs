@@ -4,6 +4,7 @@ using BISP_API.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BISP_API.Migrations
 {
     [DbContext(typeof(BISPdbContext))]
-    partial class BISPdbContextModelSnapshot : ModelSnapshot
+    [Migration("20240317113637_payment")]
+    partial class payment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,41 +44,6 @@ namespace BISP_API.Migrations
                         .IsUnique();
 
                     b.ToTable("Images");
-                });
-
-            modelBuilder.Entity("BISP_API.Models.Message", b =>
-                {
-                    b.Property<int>("MessageId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MessageId"), 1L, 1);
-
-                    b.Property<string>("MessageText")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ReceiverId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SenderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SenderImage")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("MessageId");
-
-                    b.HasIndex("ReceiverId");
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("BISP_API.Models.Review", b =>
@@ -256,25 +223,6 @@ namespace BISP_API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BISP_API.Models.Message", b =>
-                {
-                    b.HasOne("BISP_API.Models.User", "Receiver")
-                        .WithMany("ReceivedMessages")
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("BISP_API.Models.User", "Sender")
-                        .WithMany("SentMessages")
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Sender");
-                });
-
             modelBuilder.Entity("BISP_API.Models.Review", b =>
                 {
                     b.HasOne("BISP_API.Models.User", "FromUser")
@@ -374,13 +322,9 @@ namespace BISP_API.Migrations
                 {
                     b.Navigation("ProfileImage");
 
-                    b.Navigation("ReceivedMessages");
-
                     b.Navigation("ReviewsReceived");
 
                     b.Navigation("ReviewsSent");
-
-                    b.Navigation("SentMessages");
 
                     b.Navigation("Skills");
 

@@ -26,12 +26,19 @@ namespace BISP_API.Controllers
         }
 
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _authContext.Users.Include(u => u.Skills).ToListAsync();
+            return Ok(users);
+        }
+
+
         [HttpPost("authenticate")]
         public async Task<IActionResult> Authenticate([FromBody] User authObj)
         {
             if (authObj == null)
                 return BadRequest(new { Message = "Request body is missing" });
-
 
             var auth = await _authContext.Users
                 .FirstOrDefaultAsync(x => x.Username == authObj.Username);
@@ -66,13 +73,15 @@ namespace BISP_API.Controllers
                 return BadRequest(new { Message = "Request body is missing" });
 
 
+            //check username
+            if (await CheckUsernameExistAsync(authObj.Username))
+                return BadRequest(new { Message = "Username already exist" });
+
+
             // check email
             if (await CheckEmailExistAsync(authObj.Email))
                 return BadRequest(new { Message = "Email already exist" });
 
-            //check username
-            if (await CheckUsernameExistAsync(authObj.Username))
-                return BadRequest(new { Message = "Username already exist" });
 
             var passMessage = CheckPasswordStrength(authObj.Password);
             if (!string.IsNullOrEmpty(passMessage))
@@ -109,7 +118,7 @@ namespace BISP_API.Controllers
             if (pass.Length < 9)
                 sb.Append("Minimum password length should be 8" + Environment.NewLine);
             if (!Regex.IsMatch(pass, "[<,>,@,!,#,$,%,^,&,*,(,),_,+,\\[,\\],{,},?,:,;,|,',\\,.,/,~,`,-,=]"))
-                sb.Append("Password should contain special charcter" + Environment.NewLine);
+                sb.Append("Password should contain special character" + Environment.NewLine);
             return sb.ToString();
         }
 
@@ -131,7 +140,7 @@ namespace BISP_API.Controllers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = identity,
-                Expires = DateTime.Now.AddSeconds(10),
+                Expires = DateTime.Now.AddMinutes(15), // Set token to expire after 10 seconds
                 SigningCredentials = credentials
             };
             var token = jwtTokenHandler.CreateToken(tokenDescriptor);
@@ -176,14 +185,6 @@ namespace BISP_API.Controllers
         }
 
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
-        {
-            var users = await _authContext.Users.Include(u => u.Skills).ToListAsync();
-            return Ok(users);
-        }
-
-
         [HttpPost("Refresh")]
         public async Task<IActionResult> Refresh([FromBody] TokenApiDto tokenApiDto)
         {
@@ -200,6 +201,8 @@ namespace BISP_API.Controllers
             var newRefreshToken = CreateRefreshToken();
             user.RefreshToken = newRefreshToken;
             await _authContext.SaveChangesAsync();
+
+
             return Ok(new TokenApiDto()
             {
                 AccessToken = newAccessToken,

@@ -10,6 +10,7 @@
         public string Prerequisity { get; set; }
         public int UserId { get; set; }  
         public User User { get; set; }
+        public bool IsPaid { get; set; }
 
 
         public ICollection<SwapRequest> SwapRequestsOffered { get; set; }

@@ -4,6 +4,7 @@ using BISP_API.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BISP_API.Migrations
 {
     [DbContext(typeof(BISPdbContext))]
-    partial class BISPdbContextModelSnapshot : ModelSnapshot
+    [Migration("20240320183249_Message")]
+    partial class Message
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,9 +62,6 @@ namespace BISP_API.Migrations
 
                     b.Property<int>("SenderId")
                         .HasColumnType("int");
-
-                    b.Property<string>("SenderImage")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");

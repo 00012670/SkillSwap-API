@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "r8xWa6R+TryoeVSzZzovg/wlJGxqWVAm9IEtfGKd89KFKMlpIZ50ZPt9Fo7VFj7ppRdl4+l5Je5B81UefEx+PA==",
+  "dgSpecHash": "gSn6YnGUsf/5DZkWgC+i7istrKN5bFd4PMM30WxYbk3gP6KiJKF9Y0EWkW1maKKMtUV2l8ByVX2+OR2VIhhTFA==",
   "success": true,
   "projectFilePath": "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\BISP_API.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\Dinora\\.nuget\\packages\\automapper\\12.0.0\\automapper.12.0.0.nupkg.sha512",
+    "C:\\Users\\Dinora\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.0\\automapper.extensions.microsoft.dependencyinjection.12.0.0.nupkg.sha512",
     "C:\\Users\\Dinora\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\Dinora\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\6.0.9\\microsoft.aspnetcore.authentication.jwtbearer.6.0.9.nupkg.sha512",
     "C:\\Users\\Dinora\\.nuget\\packages\\microsoft.aspnetcore.jsonpatch\\6.0.27\\microsoft.aspnetcore.jsonpatch.6.0.27.nupkg.sha512",

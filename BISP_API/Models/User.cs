@@ -31,7 +31,11 @@ namespace BISP_API.Models
 
         public bool HasImage { get; set; }
 
+        public bool IsPremium { get; set; }
+
         public string RefreshToken { get; set; }
+
+
 
         public DateTime RefreshTokenExpiryTime { get; set; }
 
@@ -44,7 +48,9 @@ namespace BISP_API.Models
         public ICollection<Review> ReviewsSent { get; set; }
 
         public ICollection<Review> ReviewsReceived { get; set; }
-      //  public ICollection<PaymentMethod> PaymentMethods { get; set; }
 
+        public ICollection<Message> SentMessages { get; set; }
+        public ICollection<Message> ReceivedMessages { get; set; }
+    
     }
 }

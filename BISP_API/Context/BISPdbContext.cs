@@ -15,6 +15,8 @@ namespace BISP_API.Context
         public DbSet<Image> Images { get; set; }
         public DbSet<SwapRequest> SwapRequests { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<Message> Messages { get; set; }
+
 
         public override int SaveChanges()
         {
@@ -88,6 +90,18 @@ namespace BISP_API.Context
                 .WithMany(sr => sr.Reviews)
                 .HasForeignKey(r => r.RequestId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Sender)
+                .WithMany(u => u.SentMessages)
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);  // Prevents cascade delete
+
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Receiver)
+                .WithMany(u => u.ReceivedMessages)
+                .HasForeignKey(m => m.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
 

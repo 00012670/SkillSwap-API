@@ -47,8 +47,6 @@ namespace BISP_API.Controllers
             return Ok(new { username = user.Username });
         }
 
-
-
         [HttpPut()]
         [Route("{id}")]
         public async Task<IActionResult> UpdateProfile([FromRoute] int id, User updateProfileRequest)
@@ -69,19 +67,49 @@ namespace BISP_API.Controllers
             return Ok(profile);
         }
 
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteProfile([FromRoute] int id)
+        //{
+        //    var profile = await _profileContext.Users.FindAsync(id);
+        //    if (profile == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    _profileContext.Users.Remove(profile);
+        //    await _profileContext.SaveChangesAsync();
+
+        //    return Ok(profile);
+        //}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProfile([FromRoute] int id)
+        public async Task<IActionResult> DeleteUser(int userId)
         {
-            var profile = await _profileContext.Users.FindAsync(id);
-            if (profile == null)
+            var user = await _profileContext.Users.FindAsync(userId);
+            if (user == null)
             {
                 return NotFound();
             }
 
-            _profileContext.Users.Remove(profile);
+            int anonymousUserId = 0; 
+
+            var messagesSent = _profileContext.Messages.Where(m => m.SenderId == userId);
+            var messagesReceived = _profileContext.Messages.Where(m => m.ReceiverId == userId);
+            foreach (var message in messagesSent)
+            {
+                message.SenderId = anonymousUserId;
+            }
+            foreach (var message in messagesReceived)
+            {
+                message.ReceiverId = anonymousUserId;
+            }
+
+            _profileContext.Users.Remove(user);
             await _profileContext.SaveChangesAsync();
 
-            return Ok(profile);
+            return NoContent();
         }
+
+
+
     }
 }

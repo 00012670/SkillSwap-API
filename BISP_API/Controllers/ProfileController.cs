@@ -67,49 +67,49 @@ namespace BISP_API.Controllers
             return Ok(profile);
         }
 
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteProfile([FromRoute] int id)
-        //{
-        //    var profile = await _profileContext.Users.FindAsync(id);
-        //    if (profile == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _profileContext.Users.Remove(profile);
-        //    await _profileContext.SaveChangesAsync();
-
-        //    return Ok(profile);
-        //}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int userId)
+        public async Task<IActionResult> DeleteProfile([FromRoute] int id)
         {
-            var user = await _profileContext.Users.FindAsync(userId);
-            if (user == null)
+            var profile = await _profileContext.Users.FindAsync(id);
+            if (profile == null)
             {
                 return NotFound();
             }
 
-            int anonymousUserId = 0; 
-
-            var messagesSent = _profileContext.Messages.Where(m => m.SenderId == userId);
-            var messagesReceived = _profileContext.Messages.Where(m => m.ReceiverId == userId);
-            foreach (var message in messagesSent)
-            {
-                message.SenderId = anonymousUserId;
-            }
-            foreach (var message in messagesReceived)
-            {
-                message.ReceiverId = anonymousUserId;
-            }
-
-            _profileContext.Users.Remove(user);
+            _profileContext.Users.Remove(profile);
             await _profileContext.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(profile);
         }
 
 
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteUser(int id)
+        //{
+        //    var user = await _profileContext.Users.FindAsync(id);
+        //    if (user == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    int anonymousUserId = 0; 
+
+        //    var messagesSent = _profileContext.Messages.Where(m => m.SenderId == id);
+        //    var messagesReceived = _profileContext.Messages.Where(m => m.ReceiverId == id);
+        //    foreach (var message in messagesSent)
+        //    {
+        //        message.SenderId = anonymousUserId;
+        //    }
+        //    foreach (var message in messagesReceived)
+        //    {
+        //        message.ReceiverId = anonymousUserId;
+        //    }
+
+        //    _profileContext.Users.Remove(user);
+        //    await _profileContext.SaveChangesAsync();
+
+        //    return NoContent();
+        //}
 
     }
 }

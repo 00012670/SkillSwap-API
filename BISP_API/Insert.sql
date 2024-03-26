@@ -45,17 +45,17 @@ GO
 
 
 -- Insert into User table
-INSERT INTO Users (Username, Email, Password, FullName, Bio, SkillInterested, Token, Role)
-VALUES ('user1', 'user1@example.com', '12345678!', 'User One', 'Bio for user1', 'Skill1', '', 'Admin'),
-       ('user2', 'user2@example.com', '12345678!', 'User Two', 'Bio for user2', 'Skill2', '', 'User'),
-       ('user3', 'user3@example.com', '12345678!', 'User Three', 'Bio for user3', 'Skill3', '', 'User');
+--INSERT INTO Users (Username, Email, Password, FullName, Bio, SkillInterested, Token, Role)
+--VALUES ('user1', 'user1@example.com', '12345678!', 'User One', 'Bio for user1', 'Skill1', '', 'Admin'),
+--       ('user2', 'user2@example.com', '12345678!', 'User Two', 'Bio for user2', 'Skill2', '', 'User'),
+--       ('user3', 'user3@example.com', '12345678!', 'User Three', 'Bio for user3', 'Skill3', '', 'User');
 
 
--- Insert into Skill table
-INSERT INTO Skills (Name, Description, Category, Level, Prerequisity, UserId)
-VALUES ('skill1', 'Description for Skill1', 'Category1', 0, 'Prerequisity for Skill1', 1),
-       ('skill2', 'Description for Skill2', 'Category2', 1, 'Prerequisity for Skill2', 2),
-       ('skill3', 'Description for Skill3', 'Category3', 2, 'Prerequisity for Skill3', 3);
+---- Insert into Skill table
+--INSERT INTO Skills (Name, Description, Category, Level, Prerequisity, UserId)
+--VALUES ('skill1', 'Description for Skill1', 'Category1', 0, 'Prerequisity for Skill1', 1),
+--       ('skill2', 'Description for Skill2', 'Category2', 1, 'Prerequisity for Skill2', 2),
+--       ('skill3', 'Description for Skill3', 'Category3', 2, 'Prerequisity for Skill3', 3);
 
 
 
@@ -70,3 +70,8 @@ DROP TABLE Skills
 
 drop table Images
 
+drop table Messages
+
+SELECT DB_NAME() AS CurrentDatabase;
+
+SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Users';

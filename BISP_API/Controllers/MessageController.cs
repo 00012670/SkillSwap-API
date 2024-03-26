@@ -31,7 +31,9 @@ namespace BISP_API.Controllers
                 .Select(m => new MessageReadDto
                 {
                     MessageId = m.MessageId,
+                    SenderId = m.SenderId,
                     SenderUsername = m.Sender.Username,
+                    ImageId = m.Sender.ProfileImage.ImgId, 
                     MessageText = m.MessageText,
                     Timestamp = m.Timestamp
                 })
@@ -39,7 +41,6 @@ namespace BISP_API.Controllers
 
             return Ok(messages);
         }
-
 
         [HttpPost("SendMessage")]
         public async Task<IActionResult> SendMessage([FromBody] MessageDto messageDto)
@@ -49,10 +50,16 @@ namespace BISP_API.Controllers
                 return BadRequest(ModelState);
             }
 
+            var sender = await _context.Users.FindAsync(messageDto.SenderId);
+            if (sender == null)
+            {
+                return NotFound();
+            }
+
             var message = new Message
             {
                 SenderId = messageDto.SenderId,
-                SenderImage = messageDto.SenderImage,
+                ImageId = sender.ProfileImage?.ImgId, 
                 ReceiverId = messageDto.ReceiverId,
                 MessageText = messageDto.MessageText,
                 Timestamp = DateTime.UtcNow
@@ -97,7 +104,7 @@ namespace BISP_API.Controllers
         }
 
 
-        [HttpDelete("DeleteMessage{id}")]
+        [HttpDelete("DeleteMessage/{id}")]
         public async Task<IActionResult> DeleteMessage(int id)
         {
             var message = await _context.Messages.FindAsync(id);
@@ -106,18 +113,12 @@ namespace BISP_API.Controllers
                 return NotFound();
             }
 
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId) || userId != message.SenderId)
-            {
-                return Forbid();
-            }
-
             _context.Messages.Remove(message);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        // Other properties...
     }
 
 }

@@ -54,13 +54,14 @@ namespace BISP_API.Controllers
             var newAccessToken = auth.Token;
             var newRefreshToken = CreateRefreshToken();
             auth.RefreshToken = newRefreshToken;
-            auth.RefreshTokenExpiryTime = DateTime.Now.AddDays(5);
+            auth.RefreshTokenExpiryTime = DateTime.Now.AddDays(1);
             await _authContext.SaveChangesAsync();
 
             return Ok(new TokenApiDto()
             {
                 AccessToken = newAccessToken,
-                RefreshToken = newRefreshToken
+                RefreshToken = newRefreshToken,
+                UserId = auth.UserId,
             });
         }
 
@@ -100,6 +101,7 @@ namespace BISP_API.Controllers
                 Status = 200,
                 Message = "User Added!",
                 authObj.Token,
+                UserId = authObj.UserId
 
             });
         }

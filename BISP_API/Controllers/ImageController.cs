@@ -81,6 +81,18 @@ namespace BISP_API.Controllers
             }
         }
 
+        [HttpGet("GetImage/{id}")]
+        public async Task<IActionResult> GetImage(int id)
+        {
+            var image = await _dbContext.Images.FindAsync(id);
+            if (image == null)
+            {
+                return NotFound();
+            }
+
+            return File(image.Img, "image/jpeg");
+        }
+
 
         [HttpDelete("RemoveImage/{userId}")]
         public async Task<IActionResult> RemoveImage(int userId)

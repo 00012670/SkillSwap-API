@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BISP_API.Migrations
 {
     [DbContext(typeof(BISPdbContext))]
-    [Migration("20240218055252_v1")]
-    partial class v1
+    [Migration("20240322111923_addSenderId")]
+    partial class addSenderId
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -46,6 +46,80 @@ namespace BISP_API.Migrations
                     b.ToTable("Images");
                 });
 
+            modelBuilder.Entity("BISP_API.Models.Message", b =>
+                {
+                    b.Property<int>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MessageId"), 1L, 1);
+
+                    b.Property<int?>("ImageId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MessageText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReceiverId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("BISP_API.Models.Review", b =>
+                {
+                    b.Property<int>("ReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewId"), 1L, 1);
+
+                    b.Property<int>("FromUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RequestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SkillId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ToUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ReviewId");
+
+                    b.HasIndex("FromUserId");
+
+                    b.HasIndex("RequestId");
+
+                    b.HasIndex("SkillId");
+
+                    b.HasIndex("ToUserId");
+
+                    b.ToTable("Reviews");
+                });
+
             modelBuilder.Entity("BISP_API.Models.Skill", b =>
                 {
                     b.Property<int>("SkillId")
@@ -59,6 +133,9 @@ namespace BISP_API.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Level")
                         .HasColumnType("int");
@@ -92,6 +169,9 @@ namespace BISP_API.Migrations
 
                     b.Property<int>("InitiatorId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("ReceiverId")
                         .HasColumnType("int");
@@ -130,13 +210,26 @@ namespace BISP_API.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("HasImage")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPremium")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Role")
                         .HasColumnType("nvarchar(max)");
@@ -148,6 +241,7 @@ namespace BISP_API.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Username")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId");
@@ -164,6 +258,60 @@ namespace BISP_API.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BISP_API.Models.Message", b =>
+                {
+                    b.HasOne("BISP_API.Models.User", "Receiver")
+                        .WithMany("ReceivedMessages")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BISP_API.Models.User", "Sender")
+                        .WithMany("SentMessages")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("BISP_API.Models.Review", b =>
+                {
+                    b.HasOne("BISP_API.Models.User", "FromUser")
+                        .WithMany("ReviewsSent")
+                        .HasForeignKey("FromUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("BISP_API.Models.SwapRequest", "Request")
+                        .WithMany("Reviews")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("BISP_API.Models.Skill", "Skill")
+                        .WithMany("Reviews")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("BISP_API.Models.User", "ToUser")
+                        .WithMany("ReviewsReceived")
+                        .HasForeignKey("ToUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("FromUser");
+
+                    b.Navigation("Request");
+
+                    b.Navigation("Skill");
+
+                    b.Navigation("ToUser");
                 });
 
             modelBuilder.Entity("BISP_API.Models.Skill", b =>
@@ -214,14 +362,29 @@ namespace BISP_API.Migrations
 
             modelBuilder.Entity("BISP_API.Models.Skill", b =>
                 {
+                    b.Navigation("Reviews");
+
                     b.Navigation("SwapRequestsExchanged");
 
                     b.Navigation("SwapRequestsOffered");
                 });
 
+            modelBuilder.Entity("BISP_API.Models.SwapRequest", b =>
+                {
+                    b.Navigation("Reviews");
+                });
+
             modelBuilder.Entity("BISP_API.Models.User", b =>
                 {
                     b.Navigation("ProfileImage");
+
+                    b.Navigation("ReceivedMessages");
+
+                    b.Navigation("ReviewsReceived");
+
+                    b.Navigation("ReviewsSent");
+
+                    b.Navigation("SentMessages");
 
                     b.Navigation("Skills");
 

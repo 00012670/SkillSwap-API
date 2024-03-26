@@ -1,10 +1,6 @@
 {
   "Files": [
     {
-      "Id": "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\wwwroot\\Uploads\\Profile\\.png",
-      "PackagePath": "staticwebassets\\Uploads\\Profile\\.png"
-    },
-    {
       "Id": "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\wwwroot\\Uploads\\Profile\\1\\1.png",
       "PackagePath": "staticwebassets\\Uploads\\Profile\\1\\1.png"
     },

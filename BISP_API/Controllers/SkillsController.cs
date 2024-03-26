@@ -82,11 +82,48 @@ namespace BISP_API.Controllers
                 return NotFound();
             }
 
-            _dbContext.Remove(skill);
+            // Check if the skill is connected to any swap requests, including those marked as deleted
+            var swapRequests = await _dbContext.SwapRequests
+                .Where(sr => (sr.SkillOfferedId == id || sr.SkillRequestedId == id) && (sr.StatusRequest == SwapRequest.Status.Pending || sr.IsDeleted))
+                .ToListAsync();
+
+            // If the skill is connected to any swap requests, update their status to "Rejected" and remove the association
+            if (swapRequests.Any())
+            {
+                foreach (var swapRequest in swapRequests)
+                {
+                    swapRequest.StatusRequest = SwapRequest.Status.Rejected;
+                    if (swapRequest.SkillOfferedId == id)
+                    {
+                        swapRequest.SkillOfferedId = null;
+                    }
+                    if (swapRequest.SkillRequestedId == id)
+                    {
+                        swapRequest.SkillRequestedId = null;
+                    }
+                }
+            }
+
+            // Save changes
             await _dbContext.SaveChangesAsync();
+
+            // Now try to delete the skill
+            _dbContext.Skills.Remove(skill);
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                // This is likely due to a foreign key constraint. Log the exception and return a specific error message.
+                // Log the exception here
+                return BadRequest("This skill cannot be deleted because it is associated with existing swap requests.");
+            }
 
             return Ok(skill);
         }
+
+
 
         [HttpGet]
         [Route("GetAllSkills")]

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "feeFwZZkENOsq/2nPsPVfKwdn0BrO5TEeaCstersNTk=",
+  "Hash": "jmW9UNlkZFtnN2ddqs5XlQEdm1VG8CZeP1ZXuaExC28=",
   "Source": "BISP_API",
   "BasePath": "_content/BISP_API",
   "Mode": "Default",
@@ -16,25 +16,6 @@
     }
   ],
   "Assets": [
-    {
-      "Identity": "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\wwwroot\\Uploads\\Profile\\.png",
-      "SourceId": "BISP_API",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\wwwroot\\",
-      "BasePath": "_content/BISP_API",
-      "RelativePath": "Uploads/Profile/.png",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "PreferTarget",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\Uploads\\Profile\\.png"
-    },
     {
       "Identity": "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\wwwroot\\Uploads\\Profile\\1\\1.png",
       "SourceId": "BISP_API",

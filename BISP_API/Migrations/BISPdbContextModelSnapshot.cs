@@ -174,10 +174,10 @@ namespace BISP_API.Migrations
                     b.Property<int>("ReceiverId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SkillOfferedId")
+                    b.Property<int?>("SkillOfferedId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SkillRequestedId")
+                    b.Property<int?>("SkillRequestedId")
                         .HasColumnType("int");
 
                     b.Property<int>("StatusRequest")
@@ -208,7 +208,6 @@ namespace BISP_API.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FullName")
@@ -218,6 +217,9 @@ namespace BISP_API.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsPremium")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSuspended")
                         .HasColumnType("bit");
 
                     b.Property<string>("Password")
@@ -244,7 +246,7 @@ namespace BISP_API.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("BISP_API.Models.Image", b =>
@@ -340,14 +342,12 @@ namespace BISP_API.Migrations
                     b.HasOne("BISP_API.Models.Skill", "SkillOffered")
                         .WithMany("SwapRequestsOffered")
                         .HasForeignKey("SkillOfferedId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("BISP_API.Models.Skill", "SkillRequested")
                         .WithMany("SwapRequestsExchanged")
                         .HasForeignKey("SkillRequestedId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Initiator");
 

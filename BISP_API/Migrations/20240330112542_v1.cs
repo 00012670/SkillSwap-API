@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace BISP_API.Migrations
 {
-    public partial class addSenderId : Migration
+    public partial class v1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -16,7 +16,7 @@ namespace BISP_API.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FullName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Bio = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -25,6 +25,7 @@ namespace BISP_API.Migrations
                     Role = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     HasImage = table.Column<bool>(type: "bit", nullable: false),
                     IsPremium = table.Column<bool>(type: "bit", nullable: false),
+                    IsSuspended = table.Column<bool>(type: "bit", nullable: false),
                     RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -116,8 +117,8 @@ namespace BISP_API.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     InitiatorId = table.Column<int>(type: "int", nullable: false),
                     ReceiverId = table.Column<int>(type: "int", nullable: false),
-                    SkillOfferedId = table.Column<int>(type: "int", nullable: false),
-                    SkillRequestedId = table.Column<int>(type: "int", nullable: false),
+                    SkillOfferedId = table.Column<int>(type: "int", nullable: true),
+                    SkillRequestedId = table.Column<int>(type: "int", nullable: true),
                     Details = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     StatusRequest = table.Column<int>(type: "int", nullable: false)

@@ -2,10 +2,7 @@
 using BISP_API.Models;
 using BISP_API.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace BISP_API.Controllers
 {

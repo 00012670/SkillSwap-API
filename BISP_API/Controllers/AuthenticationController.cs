@@ -45,6 +45,10 @@ namespace BISP_API.Controllers
             if (auth == null)
                 return NotFound(new { Message = "User not found" });
 
+            // Check if the user is suspended
+            if (auth.IsSuspended)
+                return BadRequest(new { Message = "This account has been suspended" });
+
             if (!PasswordHasher.VerifyPassword(authObj.Password, auth.Password))
             {
                 return BadRequest(new { Message = "Incorrect password" });
@@ -64,7 +68,6 @@ namespace BISP_API.Controllers
                 UserId = auth.UserId,
             });
         }
-
 
 
         [HttpPost("register")]

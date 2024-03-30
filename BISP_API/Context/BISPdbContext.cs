@@ -41,13 +41,25 @@ namespace BISP_API.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>().ToTable("Users");
+
+            //modelBuilder.Entity<User>()
+            //    .HasMany(u => u.SwapRequestsInitiated)
+            //    .WithOne(sr => sr.Initiator)
+            //    .HasForeignKey(sr => sr.InitiatorId)
+            //    .OnDelete(DeleteBehavior.Cascade);
+
+            //modelBuilder.Entity<User>()
+            //    .HasMany(u => u.SwapRequestsReceived)
+            //    .WithOne(sr => sr.Receiver)
+            //    .HasForeignKey(sr => sr.ReceiverId)
+            //    .OnDelete(DeleteBehavior.Cascade);
+
 
             modelBuilder.Entity<SwapRequest>()
-                .HasOne(sr => sr.Initiator)
-                .WithMany(u => u.SwapRequestsInitiated)
-                .HasForeignKey(sr => sr.InitiatorId)
-                .OnDelete(DeleteBehavior.NoAction);
+                 .HasOne(sr => sr.Initiator)
+                 .WithMany(u => u.SwapRequestsInitiated)
+                 .HasForeignKey(sr => sr.InitiatorId)
+                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<SwapRequest>()
                 .HasOne(sr => sr.Receiver)

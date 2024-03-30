@@ -17,6 +17,8 @@ namespace BISP_API.Controllers
             _profileContext = dbContext;
         }
 
+
+
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult> GetProfilebyId([FromRoute] int id)
@@ -33,6 +35,8 @@ namespace BISP_API.Controllers
             return Ok(profile);
         }
 
+
+
         [HttpGet]
         [Route("{id}/username")]
         public async Task<ActionResult> GetUsername([FromRoute] int id)
@@ -46,6 +50,8 @@ namespace BISP_API.Controllers
 
             return Ok(new { username = user.Username });
         }
+        
+
 
         [HttpPut()]
         [Route("{id}")]
@@ -67,6 +73,8 @@ namespace BISP_API.Controllers
             return Ok(profile);
         }
 
+
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProfile([FromRoute] int id)
         {
@@ -76,6 +84,18 @@ namespace BISP_API.Controllers
                 return NotFound();
             }
 
+            // Delete or reassign all messages associated with the user
+            var messagesSent = _profileContext.Messages.Where(m => m.SenderId == id);
+            var messagesReceived = _profileContext.Messages.Where(m => m.ReceiverId == id);
+            _profileContext.Messages.RemoveRange(messagesSent);
+            _profileContext.Messages.RemoveRange(messagesReceived);
+
+            // Delete or reassign all SwapRequests associated with the user
+            var swapRequestsInitiated = _profileContext.SwapRequests.Where(sr => sr.InitiatorId == id);
+            var swapRequestsReceived = _profileContext.SwapRequests.Where(sr => sr.ReceiverId == id);
+            _profileContext.SwapRequests.RemoveRange(swapRequestsInitiated);
+            _profileContext.SwapRequests.RemoveRange(swapRequestsReceived);
+
             _profileContext.Users.Remove(profile);
             await _profileContext.SaveChangesAsync();
 
@@ -83,33 +103,39 @@ namespace BISP_API.Controllers
         }
 
 
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteUser(int id)
-        //{
-        //    var user = await _profileContext.Users.FindAsync(id);
-        //    if (user == null)
-        //    {
-        //        return NotFound();
-        //    }
 
-        //    int anonymousUserId = 0; 
+        [HttpPut("{id}/suspend")]
+        public async Task<IActionResult> SuspendUser([FromRoute] int id)
+        {
+            var user = await _profileContext.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
-        //    var messagesSent = _profileContext.Messages.Where(m => m.SenderId == id);
-        //    var messagesReceived = _profileContext.Messages.Where(m => m.ReceiverId == id);
-        //    foreach (var message in messagesSent)
-        //    {
-        //        message.SenderId = anonymousUserId;
-        //    }
-        //    foreach (var message in messagesReceived)
-        //    {
-        //        message.ReceiverId = anonymousUserId;
-        //    }
+            user.IsSuspended = true;
+            await _profileContext.SaveChangesAsync();
 
-        //    _profileContext.Users.Remove(user);
-        //    await _profileContext.SaveChangesAsync();
+            return NoContent();
+        }
 
-        //    return NoContent();
-        //}
+
+
+        [HttpPut("{id}/unsuspend")]
+        public async Task<IActionResult> UnsuspendUser([FromRoute] int id)
+        {
+            var user = await _profileContext.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.IsSuspended = false;
+            await _profileContext.SaveChangesAsync();
+
+            return NoContent();
+        }
+
 
     }
 }

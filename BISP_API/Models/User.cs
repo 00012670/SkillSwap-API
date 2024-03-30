@@ -43,6 +43,8 @@ namespace BISP_API.Models
 
         public bool IsPremium { get; set; }
 
+        public bool IsSuspended { get; set; }
+
         public string RefreshToken { get; set; }
 
         public DateTime RefreshTokenExpiryTime { get; set; }

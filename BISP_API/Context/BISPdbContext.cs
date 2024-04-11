@@ -16,6 +16,7 @@ namespace BISP_API.Context
         public DbSet<SwapRequest> SwapRequests { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<Calendar> Calendars { get; set; }
 
 
         public override int SaveChanges()
@@ -115,8 +116,13 @@ namespace BISP_API.Context
                 .HasForeignKey(m => m.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-        }
+            modelBuilder.Entity<Calendar>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Calendars)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
+        }
     }
 }
 

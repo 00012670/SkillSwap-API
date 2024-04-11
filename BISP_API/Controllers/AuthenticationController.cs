@@ -10,6 +10,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using BISP_API.Models.Dto;
+using BISP_API.UtilitySeervice;
+using Google.Apis.Auth;
+
 
 
 namespace BISP_API.Controllers
@@ -19,10 +22,15 @@ namespace BISP_API.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly BISPdbContext _authContext;
+        private readonly IConfiguration _config;
+        private readonly IEmailService _emailService;
 
-        public AuthenticationController(BISPdbContext appDbContext)
+
+        public AuthenticationController(BISPdbContext appDbContext, IConfiguration configuration, IEmailService emailService)
         {
             _authContext = appDbContext;
+            _config = configuration;
+            _emailService = emailService;
         }
 
 
@@ -70,6 +78,45 @@ namespace BISP_API.Controllers
         }
 
 
+
+        [HttpPost("LoginWithGoogle")]
+        public async Task<IActionResult> LoginWithGoogle([FromBody] GoogleAuthDto googleAuthDto)
+        {
+            var payload = await GoogleJsonWebSignature.ValidateAsync(googleAuthDto.IdToken);
+            var googleId = payload.Subject;
+
+            var user = await _authContext.Users.FirstOrDefaultAsync(u => u.GoogleId == googleId || u.Email == payload.Email);
+
+            if (user == null)
+            {
+                // Create a new user
+                user = new User
+                {
+                    GoogleId = googleId,
+                    Email = payload.Email,
+                    Username = !string.IsNullOrEmpty(payload.Email) && payload.Email.Contains('@') ? payload.Email.Split('@')[0] : "defaultUsername",
+                    Role = "User", // Set a default role
+
+                };
+
+                // Add checks for Username, Role, and UserId
+                if (string.IsNullOrEmpty(user.Username))
+                    user.Username = "defaultUsername"; // Set a default username if none is provided
+
+                if (string.IsNullOrEmpty(user.Role))
+                    user.Role = "User"; // Set a default role if none is provided
+
+                _authContext.Users.Add(user);
+                await _authContext.SaveChangesAsync();
+            }
+
+            // Create a JWT for the user and return it
+            var token = CreateJwt(user);
+            return Ok(new { token });
+        }
+
+
+
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] User authObj)
         {
@@ -91,7 +138,11 @@ namespace BISP_API.Controllers
             if (!string.IsNullOrEmpty(passMessage))
                 return BadRequest(new { Message = passMessage.ToString() });
             authObj.Password = PasswordHasher.HashPassword(authObj.Password);
+
+            //Ser "User" role
             authObj.Role = "User";
+
+
             authObj.Token = "";
             await _authContext.AddAsync(authObj);
             await _authContext.SaveChangesAsync();
@@ -114,8 +165,12 @@ namespace BISP_API.Controllers
         private Task<bool> CheckEmailExistAsync(string email)
              => _authContext.Users.AnyAsync(x => x.Email == email);
 
+   
+
         private Task<bool> CheckUsernameExistAsync(string username)
             => _authContext.Users.AnyAsync(x => x.Username == username);
+
+
 
         private static string CheckPasswordStrength(string pass)
         {
@@ -137,7 +192,7 @@ namespace BISP_API.Controllers
             {
                 new Claim(ClaimTypes.Role, auth.Role),
                 new Claim(ClaimTypes.Name,$"{auth.Username}"),
-                new Claim("userId", $"{auth.UserId}") 
+                new Claim("userId", $"{auth.UserId}")
             });
 
             var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
@@ -190,6 +245,7 @@ namespace BISP_API.Controllers
         }
 
 
+
         [HttpPost("Refresh")]
         public async Task<IActionResult> Refresh([FromBody] TokenApiDto tokenApiDto)
         {
@@ -212,6 +268,70 @@ namespace BISP_API.Controllers
             {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
+            });
+        }
+
+
+
+        [HttpPost("SendResetEmail/{email}")] 
+        public async Task<IActionResult> SendEmail(string email)
+        {
+            var user = await _authContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if(user is null)
+            {
+                return NotFound(new
+                {
+                    StatusCode = 404,
+                    Message = "Email doesn't exist"
+                });
+            }
+            var tokenBytes = RandomNumberGenerator.GetBytes(64);
+            var emailToken = Convert.ToBase64String(tokenBytes);
+            user.ResetPasswordToken = emailToken;
+            user.ResetPasswordExpiry = DateTime.Now.AddMinutes(15);
+            string from = _config["EmailSettings:From"];
+            var emailModel = new EmailModel(email, "Reset Password!!", EmailBody.EmailStringBody(email, emailToken));
+            _emailService.SendEmail(emailModel);
+            _authContext.Entry(user).State = EntityState.Modified;
+            await _authContext.SaveChangesAsync();
+            return Ok(new
+            {
+                StatusCode = 200,
+                Message = "Email Sent!"
+            }) ;
+        }
+
+
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> RessetPassword(ResetPasswordDto resetPasswordDto)
+        {
+            var newToke = resetPasswordDto.EmailToken.Replace(" ", "+");
+            var user = await _authContext.Users.AsNoTracking().FirstOrDefaultAsync(a => a.Email == resetPasswordDto.Email);
+            if (user is null)
+            {
+                return NotFound(new
+                {
+                    StatusCode = 404,
+                    Message = "User doesn't exist"
+                });
+            }
+             var tokenCode = user.ResetPasswordToken;
+             DateTime emailTokenExpiry = user.ResetPasswordExpiry;
+             if(tokenCode != resetPasswordDto.EmailToken || emailTokenExpiry < DateTime.Now)
+             {
+                return BadRequest(new
+                {
+                    StatusCode = 400,
+                    Message = "Invalid reset link"
+                });
+             }
+            user.Password = PasswordHasher.HashPassword(resetPasswordDto.NewPassword);
+            _authContext.Entry(user).State = EntityState.Modified;
+            await _authContext.SaveChangesAsync();
+            return Ok(new
+            {
+                StatusCode = 200,
+                Message = "Password reset successfully"
             });
         }
     }

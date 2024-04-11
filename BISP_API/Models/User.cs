@@ -46,7 +46,10 @@ namespace BISP_API.Models
         public bool IsSuspended { get; set; }
 
         public string RefreshToken { get; set; }
+        public string GoogleId { get; set; }
 
+        public string ResetPasswordToken { get; set; }
+        public DateTime ResetPasswordExpiry { get; set; }
         public DateTime RefreshTokenExpiryTime { get; set; }
 
         public ICollection<Skill> Skills { get; set; }
@@ -60,7 +63,10 @@ namespace BISP_API.Models
         public ICollection<Review> ReviewsReceived { get; set; }
 
         public ICollection<Message> SentMessages { get; set; }
+
         public ICollection<Message> ReceivedMessages { get; set; }
+        public ICollection<Calendar> Calendars { get; set; }
+
     }
 
 }

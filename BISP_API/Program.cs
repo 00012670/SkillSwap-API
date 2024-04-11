@@ -8,6 +8,8 @@ using System.Text;
 using System.Text.Json.Serialization;
 using AutoMapper; 
 using System;
+using BISP_API.UtilitySeervice;
+using BISP_API.UtilityService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,8 +71,10 @@ builder.Services.AddControllers().AddJsonOptions(x =>
 );
 
 // Register AutoMapper
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Set Stripe API Key
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretKey"];

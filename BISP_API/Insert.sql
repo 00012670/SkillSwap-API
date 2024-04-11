@@ -75,3 +75,17 @@ drop table Messages
 SELECT DB_NAME() AS CurrentDatabase;
 
 SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Users';
+
+IF OBJECT_ID('Users', 'U') IS NOT NULL
+    DROP TABLE [Users];
+
+    ALTER DATABASE Users MODIFY NAME = MyUsers
+
+     DELETE FROM __EFMigrationsHistory
+
+     SELECT * 
+FROM sys.objects 
+WHERE name = 'Users'
+
+IF OBJECT_ID('Users', 'U') IS NOT NULL
+    DROP TABLE [Users];

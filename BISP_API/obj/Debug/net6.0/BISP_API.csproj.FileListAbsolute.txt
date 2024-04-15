@@ -151,3 +151,4 @@ C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\Google.Apis.Core
 C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\System.CodeDom.dll
 C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\System.Management.dll
 C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\runtimes\win\lib\net6.0\System.Management.dll
+C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll

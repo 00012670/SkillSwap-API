@@ -1,4 +1,5 @@
-﻿using Stripe;
+﻿using Microsoft.AspNetCore.Identity;
+using Stripe;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -51,6 +52,8 @@ namespace BISP_API.Models
         public string ResetPasswordToken { get; set; }
         public DateTime ResetPasswordExpiry { get; set; }
         public DateTime RefreshTokenExpiryTime { get; set; }
+
+        public string CustomerId { get; set; }
 
         public ICollection<Skill> Skills { get; set; }
 

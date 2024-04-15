@@ -8,5 +8,6 @@
         public int? ImageId { get; set; }
         public string MessageText { get; set; }
         public DateTime Timestamp { get; set; }
+        public bool IsEdited { get; set; }
     }
 }

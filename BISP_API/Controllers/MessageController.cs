@@ -30,9 +30,10 @@ namespace BISP_API.Controllers
                     MessageId = m.MessageId,
                     SenderId = m.SenderId,
                     SenderUsername = m.Sender.Username,
-                    ImageId = m.Sender.ProfileImage.ImgId, 
+                    ImageId = m.Sender.ProfileImage.ImgId,
                     MessageText = m.MessageText,
-                    Timestamp = m.Timestamp
+                    Timestamp = m.Timestamp,
+                    IsEdited = m.IsEdited
                 })
                 .ToList();
 
@@ -59,7 +60,8 @@ namespace BISP_API.Controllers
                 ImageId = sender.ProfileImage?.ImgId, 
                 ReceiverId = messageDto.ReceiverId,
                 MessageText = messageDto.MessageText,
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.UtcNow,
+                IsEdited = messageDto.IsEdited
             };
 
             try
@@ -87,13 +89,8 @@ namespace BISP_API.Controllers
                 return NotFound();
             }
 
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId) || userId != message.SenderId)
-            {
-                return Forbid();
-            }
-
-            // Only allow updating the message text
             message.MessageText = messageDto.MessageText;
+            message.IsEdited = true;
 
             await _context.SaveChangesAsync();
 

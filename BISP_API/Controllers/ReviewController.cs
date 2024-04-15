@@ -17,6 +17,14 @@ namespace BISP_API.Controllers
         [HttpPost("CreateReview")]
         public async Task<IActionResult> CreateReview([FromBody] Review review)
         {
+            // Check if a review from this user for this skill already exists
+            var existingReview = await _dbContext.Reviews
+                .FirstOrDefaultAsync(r => r.FromUserId == review.FromUserId && r.SkillId == review.SkillId);
+            if (existingReview != null)
+            {
+                return BadRequest(new { Message = "You've already reviewed this skill "});
+            }
+
             // Fetch the associated SwapRequest
             var swapRequest = await _dbContext.SwapRequests.FindAsync(review.RequestId);
 
@@ -39,6 +47,32 @@ namespace BISP_API.Controllers
 
             return Ok(review);
         }
+
+
+        [HttpGet("GetReviewsByUserIdAndSkillId/{userId}/{skillId}")]
+        public async Task<IActionResult> GetReviewsByUserIdAndSkillId(int userId, int skillId)
+        {
+            
+            // Fetch reviews written for the user and associated with the skill
+            var reviews = await _dbContext.Reviews
+                .Where(r => r.ToUserId == userId && r.SkillId == skillId)
+                .Select(r => new
+                {
+                    r.ReviewId,
+                    FromUserName = r.FromUser.Username,
+                    ToUserName = r.ToUser.Username,
+                    r.SkillId,
+                    SkillName = r.Skill.Name,
+                    r.RequestId,
+                    RequestStatus = r.Request.StatusRequest.ToString(),
+                    r.Rating,
+                    r.Text
+                })
+                .ToListAsync();
+
+            return Ok(reviews);
+        }
+
 
 
         [HttpGet("GetReviewsByUserId/{userId}")]

@@ -22,5 +22,6 @@ namespace BISP_API.Models
         public int Rating { get; set; }
 
         public string Text { get; set; }
+
     }
 }

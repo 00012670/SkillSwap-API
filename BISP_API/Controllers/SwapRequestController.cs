@@ -2,6 +2,7 @@
 using BISP_API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MimeKit;
 
 namespace BISP_API.Controllers
 {
@@ -26,6 +27,20 @@ namespace BISP_API.Controllers
             }
 
             _dbContext.SwapRequests.Add(swapRequest);
+
+            // Create a new notification
+            var notification = new Notification
+            {
+                UserId = swapRequest.ReceiverId,
+                SenderId = swapRequest.InitiatorId,
+                Content = "You have a new swap request",
+                IsRead = false,
+                DateCreated = DateTime.UtcNow,
+                Type = NotificationType.SwapRequest
+            };
+
+            _dbContext.Notifications.Add(notification);
+
             await _dbContext.SaveChangesAsync();
 
             await _dbContext.Entry(swapRequest)

@@ -34,7 +34,7 @@ namespace BISP_API.UtilityService
                     client.Authenticate(_config["EmailSettings:From"], _config["EmailSettings:Password"]);
                     client.Send(emailMessage);
                 }
-                catch (Exception ex) 
+                catch (Exception) 
                 {
                     throw;
                 }

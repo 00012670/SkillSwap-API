@@ -4,9 +4,11 @@ using Stripe.Checkout;
 using BISP_API.Models.Stripe;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using BISP_API.Models;
+using BISP_API.Context;
+using BISP_API.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 
 //public class StripeOptions
@@ -23,13 +25,26 @@ namespace BISP_API.Controllers
     {
         private readonly StripeSettings _stripeSettings;
 
-        private readonly UserManager<User> _userManager;
-        public PaymentController(IOptions<StripeSettings> stripeSettings, UserManager<User> userManager)
-        {
-            _stripeSettings = stripeSettings.Value;
-            _userManager = userManager;
 
+        private readonly BISPdbContext _context;
+
+        private readonly ILogger<PaymentController> _logger;
+
+        private readonly ISubscriptionRepository _subscriberRepository;
+
+
+
+        public PaymentController(IOptions<StripeSettings> stripeSettings, BISPdbContext context, ILogger<PaymentController> logger, ISubscriptionRepository subscriberRepository)
+        {
+            _subscriberRepository = subscriberRepository;
+            _stripeSettings = stripeSettings.Value;
+            _context = context;
+            _logger = logger;
+            _subscriberRepository = subscriberRepository;
         }
+
+
+
         //[HttpGet("Products")]
         //public IActionResult Product() 
         //{
@@ -78,6 +93,8 @@ namespace BISP_API.Controllers
         //    return new StatusCodeResult(303);
         //}
 
+
+
         [HttpPost("create-checkout-session")]
         public async Task<IActionResult> CreateCheckoutSession([FromBody] CreateCheckoutSessionRequest req)
         {
@@ -125,27 +142,87 @@ namespace BISP_API.Controllers
             }
         }
 
-        [Authorize]
 
+
+        private async Task<string> GetStripeCustomerIdForUser(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            return user?.CustomerId;
+        }
+
+        //[HttpPost]
+        //public async Task<IActionResult> Index()
+        //{
+        //    var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+
+        //    try
+        //    {
+        //        var stripeEvent = EventUtility.ConstructEvent(json,
+        //         Request.Headers["Stripe-Signature"], _stripeSettings.WHSecret);
+
+
+        //        // Handle the event
+        //        if (stripeEvent.Type == Events.PaymentIntentSucceeded)
+        //        {
+        //            var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+        //            Console.WriteLine("PaymentIntent was successful!");
+        //        }
+        //        else if (stripeEvent.Type == Events.PaymentMethodAttached)
+        //        {
+        //            var paymentMethod = stripeEvent.Data.Object as PaymentMethod;
+        //            Console.WriteLine("PaymentMethod was attached to a Customer!");
+        //        }
+        //        // ... handle other event types
+        //        else
+        //        {
+        //            Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
+        //        }
+
+        //        return Ok();
+        //    }
+        //    catch (StripeException e)
+        //    {
+        //        return BadRequest(e.Message);
+        //    }
+        //}
+    
+
+[Authorize]
         [HttpPost("customer-portal")]
         public async Task<IActionResult> CustomerPortal([FromBody] CustomerPortalRequest req)
         {
-            //Customer Portal API -- Inside try block
-            ClaimsPrincipal principal = HttpContext.User as ClaimsPrincipal;
-            var claim = principal.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname");
-            var userFromDb = await _userManager.FindByNameAsync(claim.Value);
+            string userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            User user = null;
+            if (int.TryParse(userIdString, out int userId))
+            {
+                user = await _context.Users.FindAsync(userId);
+            }
+            else
+            {
+                return BadRequest("Invalid user ID");
+            }
+            _logger.LogInformation($"User ID: {userId}");
 
-            if (userFromDb == null)
+            if (user == null)
             {
                 return BadRequest();
             }
+
+            string customerId = await GetStripeCustomerIdForUser(userId); // Pass userId instead of userIdString
+            _logger.LogInformation($"Stripe Customer ID: {customerId}");
+
+            if (string.IsNullOrEmpty(customerId))
+            {
+                return BadRequest();
+            }
+
 
 
             try
             {
                 var options = new Stripe.BillingPortal.SessionCreateOptions
                 {
-                    Customer = userFromDb.CustomerId,
+                    Customer = customerId,
                     ReturnUrl = req.ReturnUrl,
                 };
                 var service = new Stripe.BillingPortal.SessionService();
@@ -169,96 +246,131 @@ namespace BISP_API.Controllers
             }
         }
 
-        //[Route("create-portal-session")]
-        //[ApiController]
-        //public class PortalApiController : Controller
-        //{
-        //    [HttpPost]
-        //    public ActionResult Create()
-        //    {
-        //        // For demonstration purposes, we're using the Checkout session to retrieve the customer ID.
-        //        // Typically this is stored alongside the authenticated user in your database.
-        //        var checkoutService = new SessionService();
-        //        var checkoutSession = checkoutService.Get(Request.Form["session_id"]);
 
-        //        // This is the URL to which your customer will return after
-        //        // they are done managing billing in the Customer Portal.
-        //        var returnUrl = "http://localhost:4242";
+        [HttpPost("webhook")]
+        public async Task<IActionResult> WebHook()
+        {
+            var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+            _logger.LogInformation("WebHook method called");
 
-        //        var options = new Stripe.BillingPortal.SessionCreateOptions
-        //        {
-        //            Customer = checkoutSession.CustomerId,
-        //            ReturnUrl = returnUrl,
-        //        };
-        //        var service = new Stripe.BillingPortal.SessionService();
-        //        var session = service.Create(options);
 
-        //        Response.Headers.Add("Location", session.Url);
-        //        return new StatusCodeResult(303);
-        //    }
-        //}
+            try
+            {
+                var stripeEvent = EventUtility.ConstructEvent(
+                 json,
+                 Request.Headers["Stripe-Signature"],
+                 _stripeSettings.WHSecret
+               );
 
-        //[Route("webhook")]
-        //[ApiController]
-        //public class WebhookController : Controller
-        //{
-        //    [HttpPost]
-        //    public async Task<IActionResult> Index()
-        //    {
-        //        var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-        //        // Replace this endpoint secret with your endpoint's unique secret
-        //        // If you are testing with the CLI, find the secret by running 'stripe listen'
-        //        // If you are using an endpoint defined with the API or dashboard, look in your webhook settings
-        //        // at https://dashboard.stripe.com/webhooks
-        //        const string endpointSecret = "whsec_12345";
-        //        try
-        //        {
-        //            var stripeEvent = EventUtility.ParseEvent(json);
-        //            var signatureHeader = Request.Headers["Stripe-Signature"];
-        //            stripeEvent = EventUtility.ConstructEvent(json,
-        //                    signatureHeader, endpointSecret);
-        //            if (stripeEvent.Type == Events.CustomerSubscriptionDeleted)
-        //            {
-        //                var subscription = stripeEvent.Data.Object as Subscription;
-        //                Console.WriteLine("A subscription was canceled.", subscription.Id);
-        //                // Then define and call a method to handle the successful payment intent.
-        //                // handleSubscriptionCanceled(subscription);
-        //            }
-        //            else if (stripeEvent.Type == Events.CustomerSubscriptionUpdated)
-        //            {
-        //                var subscription = stripeEvent.Data.Object as Subscription;
-        //                Console.WriteLine("A subscription was updated.", subscription.Id);
-        //                // Then define and call a method to handle the successful payment intent.
-        //                // handleSubscriptionUpdated(subscription);
-        //            }
-        //            else if (stripeEvent.Type == Events.CustomerSubscriptionCreated)
-        //            {
-        //                var subscription = stripeEvent.Data.Object as Subscription;
-        //                Console.WriteLine("A subscription was created.", subscription.Id);
-        //                // Then define and call a method to handle the successful payment intent.
-        //                // handleSubscriptionUpdated(subscription);
-        //            }
-        //            else if (stripeEvent.Type == Events.CustomerSubscriptionTrialWillEnd)
-        //            {
-        //                var subscription = stripeEvent.Data.Object as Subscription;
-        //                Console.WriteLine("A subscription trial will end", subscription.Id);
-        //                // Then define and call a method to handle the successful payment intent.
-        //                // handleSubscriptionUpdated(subscription);
-        //            }
-        //            else
-        //            {
-        //                Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
-        //            }
-        //            return Ok();
-        //        }
-        //        catch (StripeException e)
-        //        {
-        //            Console.WriteLine("Error: {0}", e.Message);
-        //            return BadRequest();
-        //        }
-        //    }
-        //}
+                // Handle the event
+                if (stripeEvent.Type == Events.CustomerSubscriptionCreated)
+                {
+                    var subscription = stripeEvent.Data.Object as Subscription;
+
+                    //Do stuff
+                    await addSubscriptionToDb(subscription);
+                    _logger.LogInformation("Handling CustomerSubscriptionCreated event");
+
+                }
+                else if (stripeEvent.Type == Events.CustomerSubscriptionUpdated)
+                {
+                    var session = stripeEvent.Data.Object as Subscription;
+
+                    // Update Subsription
+                    await updateSubscription(session);
+                }
+                else if (stripeEvent.Type == Events.CustomerCreated)
+                {
+                    _logger.LogInformation("Handling CustomerSubscriptionUpdated event");
+
+                    var customer = stripeEvent.Data.Object as Customer;
+
+                    //Do Stuff
+                    await addCustomerIdToUser(customer);
+                }
+                // ... handle other event types
+                else
+                {
+                    // Unexpected event type
+                    Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
+                }
+                return Ok();
+            }
+            catch (StripeException e)
+            {
+                Console.WriteLine(e.StripeError.Message);
+                return BadRequest();
+            }
+            catch (Exception e) // catch all other exceptions
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = e.Message, stackTrace = e.StackTrace });
+            }
+        }
+
+        private async Task updateSubscription(Subscription subscription)
+        {
+            try
+            {
+                var subscriptionFromDb = await _subscriberRepository.GetByIdAsync(subscription.Id);
+                if (subscriptionFromDb != null)
+                {
+                    subscriptionFromDb.Status = subscription.Status;
+                    subscriptionFromDb.CurrentPeriodEnd = subscription.CurrentPeriodEnd;
+                    await _subscriberRepository.UpdateAsync(subscriptionFromDb);
+                }
+
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Unable to update subscription");
+            }
+
+        }
+
+        private async Task addCustomerIdToUser(Customer customer)
+        {
+            try
+            {
+                var userFromDb = await _context.Users.FirstOrDefaultAsync(u => u.Email == customer.Email);
+
+                if (userFromDb != null)
+                {
+                    userFromDb.CustomerId = customer.Id;
+                    _context.Users.Update(userFromDb);
+                    await _context.SaveChangesAsync();
+                }
+
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Unable to add customer id to user");
+            }
+        }
+
+        private async Task addSubscriptionToDb(Subscription subscription)
+        {
+            _logger.LogInformation("addSubscriptionToDb called");
+
+            try
+            {
+                var subscriber = new Subscriber
+                {
+                    Id = subscription.Id,
+                    CustomerId = subscription.CustomerId,
+                    Status = "active",
+                    CurrentPeriodEnd = subscription.CurrentPeriodEnd
+                };
+                await _subscriberRepository.CreateAsync(subscriber);
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Unable to add new subscriber to Database");
+            }
+        }
     }
 }
+
+
 
 

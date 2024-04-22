@@ -4,6 +4,7 @@ using BISP_API.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BISP_API.Migrations
 {
     [DbContext(typeof(BISPdbContext))]
-    partial class BISPdbContextModelSnapshot : ModelSnapshot
+    [Migration("20240422082902_AddSenderIdToNotification")]
+    partial class AddSenderIdToNotification
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -129,13 +131,7 @@ namespace BISP_API.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("MessageId")
-                        .HasColumnType("int");
-
                     b.Property<int>("SenderId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SwapRequestId")
                         .HasColumnType("int");
 
                     b.Property<int>("Type")
@@ -145,10 +141,6 @@ namespace BISP_API.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("NotificationId");
-
-                    b.HasIndex("MessageId");
-
-                    b.HasIndex("SwapRequestId");
 
                     b.HasIndex("UserId");
 
@@ -399,25 +391,11 @@ namespace BISP_API.Migrations
 
             modelBuilder.Entity("BISP_API.Models.Notification", b =>
                 {
-                    b.HasOne("BISP_API.Models.Message", "Message")
-                        .WithMany("Notifications")
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("BISP_API.Models.SwapRequest", "SwapRequest")
-                        .WithMany("Notifications")
-                        .HasForeignKey("SwapRequestId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("BISP_API.Models.User", "User")
                         .WithMany("Notifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Message");
-
-                    b.Navigation("SwapRequest");
 
                     b.Navigation("User");
                 });
@@ -501,11 +479,6 @@ namespace BISP_API.Migrations
                     b.Navigation("SkillRequested");
                 });
 
-            modelBuilder.Entity("BISP_API.Models.Message", b =>
-                {
-                    b.Navigation("Notifications");
-                });
-
             modelBuilder.Entity("BISP_API.Models.Skill", b =>
                 {
                     b.Navigation("Reviews");
@@ -517,8 +490,6 @@ namespace BISP_API.Migrations
 
             modelBuilder.Entity("BISP_API.Models.SwapRequest", b =>
                 {
-                    b.Navigation("Notifications");
-
                     b.Navigation("Reviews");
                 });
 

@@ -10,6 +10,7 @@
         "dependencies": {
           "AutoMapper.Extensions.Microsoft.DependencyInjection": "11.0.0",
           "Google.Apis.Auth": "1.67.0",
+          "Google.Apis.Calendar.v3": "1.67.0.3374",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "6.0.9",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "6.0.0",
           "Microsoft.AspNetCore.Mvc.NewtonsoftJson": "6.0.27",
@@ -68,6 +69,18 @@
           "lib/net6.0/Google.Apis.Auth.dll": {
             "assemblyVersion": "1.67.0.0",
             "fileVersion": "1.67.0.0"
+          }
+        }
+      },
+      "Google.Apis.Calendar.v3/1.67.0.3374": {
+        "dependencies": {
+          "Google.Apis": "1.67.0",
+          "Google.Apis.Auth": "1.67.0"
+        },
+        "runtime": {
+          "lib/net6.0/Google.Apis.Calendar.v3.dll": {
+            "assemblyVersion": "1.67.0.3374",
+            "fileVersion": "1.67.0.3374"
           }
         }
       },
@@ -747,6 +760,13 @@
       "sha512": "sha512-Bs9BlbZ12Y4NXzMONjpzQhZr9VbwLUTGMHkcQRF36aYnk2fYrmj5HNVNh7PPHDDq1fcEQpCtPic2nSlpYQLKXw==",
       "path": "google.apis.auth/1.67.0",
       "hashPath": "google.apis.auth.1.67.0.nupkg.sha512"
+    },
+    "Google.Apis.Calendar.v3/1.67.0.3374": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-oDLgfIPyaWi1w68eTI0/06iGTtorBRBV71fcveYZ7ho86P+O3TC0bNW2vju9sUi8dqeaDaiWtXHQmJU4aUFaew==",
+      "path": "google.apis.calendar.v3/1.67.0.3374",
+      "hashPath": "google.apis.calendar.v3.1.67.0.3374.nupkg.sha512"
     },
     "Google.Apis.Core/1.67.0": {
       "type": "package",

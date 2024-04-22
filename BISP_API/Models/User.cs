@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BISP_API.Models
 {
-    public class User
+    public class User 
     {
         public User()
         {
@@ -45,7 +45,6 @@ namespace BISP_API.Models
         public bool IsPremium { get; set; }
 
         public bool IsSuspended { get; set; }
-
         public string RefreshToken { get; set; }
         public string GoogleId { get; set; }
 
@@ -69,6 +68,7 @@ namespace BISP_API.Models
 
         public ICollection<Message> ReceivedMessages { get; set; }
         public ICollection<Calendar> Calendars { get; set; }
+        public ICollection<Notification> Notifications { get; set; }
 
     }
 

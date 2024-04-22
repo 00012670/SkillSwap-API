@@ -19,6 +19,7 @@ namespace BISP_API.Models
         public bool IsDeleted { get; set; }
         public Status StatusRequest { get; set; }
         public ICollection<Review> Reviews { get; set; }
+        public ICollection<Notification> Notifications { get; set; }
 
 
 

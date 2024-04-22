@@ -67,6 +67,20 @@ namespace BISP_API.Controllers
             try
             {
                 _context.Messages.Add(message);
+
+                // Create a new notification
+                var notification = new Notification
+                {
+                    UserId = messageDto.ReceiverId,
+                    SenderId = messageDto.SenderId,
+                    Content = "You have a new message",
+                    IsRead = false,
+                    DateCreated = DateTime.UtcNow,
+                    Type = NotificationType.Message
+                };
+                _context.Notifications.Add(notification);
+
+
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)

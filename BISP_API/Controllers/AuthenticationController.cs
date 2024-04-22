@@ -12,6 +12,8 @@ using System.Security.Cryptography;
 using BISP_API.Models.Dto;
 using BISP_API.UtilitySeervice;
 using Google.Apis.Auth;
+using BISP_API.Repositories;
+using BISP_API.Services;
 
 
 
@@ -24,13 +26,17 @@ namespace BISP_API.Controllers
         private readonly BISPdbContext _authContext;
         private readonly IConfiguration _config;
         private readonly IEmailService _emailService;
+        private readonly ISubscriptionRepository _subscriberRepository;
+        private readonly IJWTService _jwtService;
+        private bool isSubscriber;
 
-
-        public AuthenticationController(BISPdbContext appDbContext, IConfiguration configuration, IEmailService emailService)
+        public AuthenticationController(BISPdbContext appDbContext, IConfiguration configuration, IEmailService emailService, ISubscriptionRepository subscriberRepository, IJWTService jWTService)
         {
             _authContext = appDbContext;
             _config = configuration;
             _emailService = emailService;
+            _subscriberRepository = subscriberRepository;
+            _jwtService = jWTService;
         }
 
 
@@ -62,11 +68,25 @@ namespace BISP_API.Controllers
                 return BadRequest(new { Message = "Incorrect password" });
             }
 
-            auth.Token = CreateJwt(auth);
+            var subscription = await _subscriberRepository.GetByCustomerIdAsync(auth.CustomerId);
+            DateTime expDate;
+            var isSubscriber = false;
+
+            if (subscription != null && subscription.Status == "active")
+            {
+                isSubscriber = true;
+                expDate = subscription.CurrentPeriodEnd;
+            }
+            else
+            {
+                expDate = DateTime.Now.AddDays(7);
+            }
+
+            auth.Token = _jwtService.CreateJwt(auth, isSubscriber);
             var newAccessToken = auth.Token;
             var newRefreshToken = CreateRefreshToken();
             auth.RefreshToken = newRefreshToken;
-            auth.RefreshTokenExpiryTime = DateTime.Now.AddDays(1);
+            auth.RefreshTokenExpiryTime = DateTime.Now.AddDays(10);
             await _authContext.SaveChangesAsync();
 
             return Ok(new TokenApiDto()
@@ -95,7 +115,7 @@ namespace BISP_API.Controllers
                     GoogleId = googleId,
                     Email = payload.Email,
                     Username = !string.IsNullOrEmpty(payload.Email) && payload.Email.Contains('@') ? payload.Email.Split('@')[0] : "defaultUsername",
-                    Role = "User", // Set a default role
+                    Role = "User", 
 
                 };
 
@@ -111,7 +131,7 @@ namespace BISP_API.Controllers
             }
 
             // Create a JWT for the user and return it
-            var token = CreateJwt(user);
+            var token = _jwtService.CreateJwt(user, isSubscriber);
             return Ok(new { token });
         }
 
@@ -147,7 +167,7 @@ namespace BISP_API.Controllers
             await _authContext.AddAsync(authObj);
             await _authContext.SaveChangesAsync();
 
-            authObj.Token = CreateJwt(authObj);
+            authObj.Token = _jwtService.CreateJwt(authObj, isSubscriber);
 
 
             return Ok(new
@@ -159,7 +179,6 @@ namespace BISP_API.Controllers
 
             });
         }
-
 
 
         private Task<bool> CheckEmailExistAsync(string email)
@@ -184,31 +203,6 @@ namespace BISP_API.Controllers
 
 
 
-        private string CreateJwt(User auth)
-        {
-            var jwtTokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("veryverysceret.....");
-            var identity = new ClaimsIdentity(new Claim[]
-            {
-                new Claim(ClaimTypes.Role, auth.Role),
-                new Claim(ClaimTypes.Name,$"{auth.Username}"),
-                new Claim("userId", $"{auth.UserId}")
-            });
-
-            var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = identity,
-                Expires = DateTime.Now.AddMinutes(15), // Set token to expire after 10 seconds
-                SigningCredentials = credentials
-            };
-            var token = jwtTokenHandler.CreateToken(tokenDescriptor);
-            return jwtTokenHandler.WriteToken(token);
-        }
-
-
-
         private string CreateRefreshToken()
         {
             var tokenBytes = RandomNumberGenerator.GetBytes(64);
@@ -223,29 +217,7 @@ namespace BISP_API.Controllers
             return refreshToken;
         }
 
-        private ClaimsPrincipal GetPrincipleFromExpiredToken(string token)
-        {
-            var key = Encoding.ASCII.GetBytes("veryverysceret.....");
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateAudience = false,
-                ValidateIssuer = false,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateLifetime = false
-            };
-            var tokenHandler = new JwtSecurityTokenHandler();
-            SecurityToken securityToken;
-            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
-            var jwtSecurityToken = securityToken as JwtSecurityToken;
-            if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-                throw new SecurityTokenException("This is Invalid Token");
-            return principal;
-
-        }
-
-
-
+  
         [HttpPost("Refresh")]
         public async Task<IActionResult> Refresh([FromBody] TokenApiDto tokenApiDto)
         {
@@ -253,12 +225,12 @@ namespace BISP_API.Controllers
                 return BadRequest("Invalid Client Request");
             string accessToken = tokenApiDto.AccessToken;
             string refreshToken = tokenApiDto.RefreshToken;
-            var principal = GetPrincipleFromExpiredToken(accessToken);
+            var principal = _jwtService.GetPrincipleFromExpiredToken(accessToken);
             var username = principal.Identity.Name;
             var user = await _authContext.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
                 return BadRequest("Invalid Request");
-            var newAccessToken = CreateJwt(user);
+            var newAccessToken = _jwtService.CreateJwt(user, isSubscriber);
             var newRefreshToken = CreateRefreshToken();
             user.RefreshToken = newRefreshToken;
             await _authContext.SaveChangesAsync();
@@ -270,8 +242,6 @@ namespace BISP_API.Controllers
                 RefreshToken = newRefreshToken,
             });
         }
-
-
 
         [HttpPost("SendResetEmail/{email}")] 
         public async Task<IActionResult> SendEmail(string email)

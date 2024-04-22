@@ -17,6 +17,8 @@ namespace BISP_API.Context
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Calendar> Calendars { get; set; }
+        public DbSet<Subscriber> Subscribers { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
 
         public override int SaveChanges()
@@ -121,6 +123,19 @@ namespace BISP_API.Context
                 .WithMany(u => u.Calendars)
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Message)
+                .WithMany(m => m.Notifications)
+                .HasForeignKey(n => n.MessageId)
+                .OnDelete(DeleteBehavior.Restrict);  
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.SwapRequest)
+                .WithMany(sr => sr.Notifications)
+                .HasForeignKey(n => n.SwapRequestId)
+                .OnDelete(DeleteBehavior.Restrict);
+
 
         }
     }

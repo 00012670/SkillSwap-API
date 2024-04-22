@@ -6,13 +6,12 @@ using Microsoft.IdentityModel.Tokens;
 using Stripe;
 using System.Text;
 using System.Text.Json.Serialization;
-using AutoMapper; 
-using System;
 using BISP_API.UtilitySeervice;
 using BISP_API.UtilityService;
 using BISP_API.Models.Stripe;
-using BISP_API.Models;
-using Microsoft.AspNetCore.Identity;
+using BISP_API.Repositories;
+using BISP_API.Services;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,7 +53,7 @@ builder.Services.AddAuthentication(x =>
     x.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("veryverysceret.....")),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"])),
         ValidateAudience = false,
         ValidateIssuer = false,
         ClockSkew = TimeSpan.Zero
@@ -78,11 +77,14 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<IJWTService, JWTService>();
 
 
 
 // Configure Stripe
 StripeConfiguration.ApiKey = builder.Configuration.GetValue<string>("StripeSettings:PrivateKey");
+
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
 
 var app = builder.Build();

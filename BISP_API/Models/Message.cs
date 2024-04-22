@@ -14,5 +14,8 @@ namespace BISP_API.Models
         public bool IsEdited { get; set; }
         public User Sender { get; set; }
         public User Receiver { get; set; }
+
+        public ICollection<Notification> Notifications { get; set; }
+
     }
 }

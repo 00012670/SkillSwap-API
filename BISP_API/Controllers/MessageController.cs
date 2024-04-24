@@ -2,6 +2,7 @@
 using BISP_API.Models;
 using BISP_API.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace BISP_API.Controllers
@@ -57,7 +58,7 @@ namespace BISP_API.Controllers
             var message = new Message
             {
                 SenderId = messageDto.SenderId,
-                ImageId = sender.ProfileImage?.ImgId, 
+                ImageId = sender.ProfileImage?.ImgId,
                 ReceiverId = messageDto.ReceiverId,
                 MessageText = messageDto.MessageText,
                 Timestamp = DateTime.UtcNow,
@@ -122,6 +123,30 @@ namespace BISP_API.Controllers
             }
 
             _context.Messages.Remove(message);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpGet("GetUnreadMessageCount/{senderId}/{receiverId}")]
+        public async Task<IActionResult> GetUnreadMessageCount(int senderId, int receiverId)
+        {
+            var unreadMessageCount = await _context.Messages
+                .Where(m => m.SenderId == senderId && m.ReceiverId == receiverId && m.IsRead == false)
+                .CountAsync();
+
+            return Ok(unreadMessageCount);
+        }
+
+        [HttpPut("MarkMessagesAsRead/{senderId}/{receiverId}")]
+        public async Task<IActionResult> MarkMessagesAsRead(int senderId, int receiverId)
+        {
+            var messages = await _context.Messages
+                .Where(m => m.SenderId == senderId && m.ReceiverId == receiverId && !m.IsRead)
+                .ToListAsync();
+
+            messages.ForEach(m => m.IsRead = true);
+
             await _context.SaveChangesAsync();
 
             return NoContent();

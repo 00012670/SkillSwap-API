@@ -12,6 +12,7 @@ namespace BISP_API.Models
         public string MessageText { get; set; }
         public DateTime Timestamp { get; set; }
         public bool IsEdited { get; set; }
+        public bool IsRead { get; set; }
         public User Sender { get; set; }
         public User Receiver { get; set; }
 

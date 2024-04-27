@@ -1,5 +1,4 @@
 ﻿using BISP_API.Context;
-using BISP_API.Helper;
 using BISP_API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,13 +11,10 @@ namespace BISP_API.Controllers
     public class ProfileController : Controller
     {
         private readonly BISPdbContext _profileContext;
-        private readonly IWebHostEnvironment hostingEnv;
 
-        public ProfileController(BISPdbContext dbContext, IWebHostEnvironment environment)
+        public ProfileController(BISPdbContext dbContext)
         {
             _profileContext = dbContext;
-            hostingEnv = environment;
-
         }
 
 
@@ -27,7 +23,9 @@ namespace BISP_API.Controllers
         [Route("{id}")]
         public async Task<ActionResult> GetProfilebyId([FromRoute] int id)
         {
-            var profile = await _profileContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            var profile = await _profileContext.Users
+                .Include(u => u.Skills)
+                .FirstOrDefaultAsync(x => x.UserId == id);
 
             if (profile == null)
             {
@@ -39,7 +37,23 @@ namespace BISP_API.Controllers
 
 
 
-        [HttpPost()]
+        [HttpGet]
+        [Route("{id}/username")]
+        public async Task<ActionResult> GetUsername([FromRoute] int id)
+        {
+            var user = await _profileContext.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new { username = user.Username });
+        }
+        
+
+
+        [HttpPut()]
         [Route("{id}")]
         public async Task<IActionResult> UpdateProfile([FromRoute] int id, User updateProfileRequest)
         {
@@ -60,88 +74,68 @@ namespace BISP_API.Controllers
         }
 
 
-        [HttpPut("UploadImage")]
-        public async Task<ActionResult> UploadImage(IFormFile formFile, string imgId)
-        {
-            APIResponse response = new();
-            try
-            {
-                string Filepath = GetFilePath(imgId);
-                if (!System.IO.Directory.Exists(Filepath))
-                {
-                    System.IO.Directory.CreateDirectory(Filepath);
-                }
-                string imagepath = Filepath + "\\" + imgId + ".png";
-                if (System.IO.File.Exists(imagepath))
-                {
-                    System.IO.File.Delete(imagepath);
-                }
-                using FileStream stream = System.IO.File.Create(imagepath);
-                await formFile.CopyToAsync(stream);
-                response.ResponseCode = 200;
-                response.Result = "pass";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return Ok(response);
-        }
 
-
-        [HttpGet("GetImage")]
-        public async Task<IActionResult> GetImage(string imgId)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProfile([FromRoute] int id)
         {
-            string Imageurl = string.Empty;
-            string hosturl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
-            try
-            {
-                string Filepath = GetFilePath(imgId);
-                string imagepath = Filepath + "\\" + imgId + ".png";
-                if (System.IO.File.Exists(imagepath))
-                {
-                    Imageurl = hosturl + "/Uploads/Profile/" + imgId + "/" + imgId + ".png";
-                }
-                else
-                {
-                    return NotFound();
-                }
-            }
-            catch (Exception)
-            {
-            }
-            return Ok(Imageurl);
-        }
-
-        [HttpDelete("RemoveImage")]
-        public async Task<IActionResult> RemoveImage(string imgId)
-        {
-            try
-            {
-                string Filepath = GetFilePath(imgId);
-                string Imagepath = Filepath + "\\" + imgId + ".png";
-                if (System.IO.File.Exists(Imagepath))
-                {
-                    System.IO.File.Delete(Imagepath);
-                    return Ok("pass");
-                }
-                else
-                {
-                    return NotFound();
-                }
-            }
-            catch (Exception)
+            var profile = await _profileContext.Users.FindAsync(id);
+            if (profile == null)
             {
                 return NotFound();
             }
+
+            // Delete or reassign all messages associated with the user
+            var messagesSent = _profileContext.Messages.Where(m => m.SenderId == id);
+            var messagesReceived = _profileContext.Messages.Where(m => m.ReceiverId == id);
+            _profileContext.Messages.RemoveRange(messagesSent);
+            _profileContext.Messages.RemoveRange(messagesReceived);
+
+            // Delete or reassign all SwapRequests associated with the user
+            var swapRequestsInitiated = _profileContext.SwapRequests.Where(sr => sr.InitiatorId == id);
+            var swapRequestsReceived = _profileContext.SwapRequests.Where(sr => sr.ReceiverId == id);
+            _profileContext.SwapRequests.RemoveRange(swapRequestsInitiated);
+            _profileContext.SwapRequests.RemoveRange(swapRequestsReceived);
+
+            _profileContext.Users.Remove(profile);
+            await _profileContext.SaveChangesAsync();
+
+            return Ok(profile);
         }
 
-       
-        [NonAction]
-        public string GetFilePath(string imgId)
+
+
+        [HttpPut("{id}/suspend")]
+        public async Task<IActionResult> SuspendUser([FromRoute] int id)
         {
-            return this.hostingEnv.WebRootPath + "\\Uploads\\Profile\\" + imgId;
+            var user = await _profileContext.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.IsSuspended = true;
+            await _profileContext.SaveChangesAsync();
+
+            return NoContent();
         }
+
+
+
+        [HttpPut("{id}/unsuspend")]
+        public async Task<IActionResult> UnsuspendUser([FromRoute] int id)
+        {
+            var user = await _profileContext.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.IsSuspended = false;
+            await _profileContext.SaveChangesAsync();
+
+            return NoContent();
+        }
+
 
     }
 }

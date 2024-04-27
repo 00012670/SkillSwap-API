@@ -1,10 +1,7 @@
 ﻿using BISP_API.Context;
-using BISP_API.Helper;
 using BISP_API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
-using System;
 
 namespace BISP_API.Controllers
 {
@@ -13,41 +10,37 @@ namespace BISP_API.Controllers
     public class SkillsController : Controller
     {
         private readonly BISPdbContext _dbContext;
-        private readonly IWebHostEnvironment hostingEnv;
 
-        public SkillsController(BISPdbContext dbContext, IWebHostEnvironment environment)
+        public SkillsController(BISPdbContext dbContext)
         {
             _dbContext = dbContext;
-            hostingEnv = environment;
 
-        }
-
-
-
-        [HttpGet]
-
-        public async Task<IActionResult> GetAllSkills()
-        {
-            var skills = await _dbContext.Skills.ToListAsync();
-            return Ok(skills);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddSkill([FromBody] Skill skillRequest)
+        [Route("AddSkillToUser/{userId}")]
+        public async Task<IActionResult> AddSkillToUser([FromRoute] int userId, [FromBody] Skill addSkillRequest)
         {
-            _dbContext.Skills.Add(skillRequest);
-            skillRequest.Level = (SkillLevel)Enum.Parse(typeof(SkillLevel), skillRequest.Level.ToString(), true);
+            var user = await _dbContext.Users.Include(u => u.Skills).FirstOrDefaultAsync(u => u.UserId == userId);
 
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            addSkillRequest.User = user;
+            _dbContext.Skills.Add(addSkillRequest);
             await _dbContext.SaveChangesAsync();
 
-            return Ok(skillRequest);
+            return Ok(addSkillRequest);
         }
 
+
         [HttpGet]
-        [Route("{id}")]
+        [Route("GetSkillBy/{id}")]
         public async Task<IActionResult> GetSkillbyId([FromRoute] int id)
         {
-            var skill = await _dbContext.Skills.FirstOrDefaultAsync(x => x.Id == id);
+            var skill = await _dbContext.Skills.FirstOrDefaultAsync(x => x.SkillId == id);
 
             if (skill == null)
             {
@@ -58,7 +51,7 @@ namespace BISP_API.Controllers
         }
 
         [HttpPut]
-        [Route("{id}")]
+        [Route("UpdateSkillBy/{id}")]
         public async Task<IActionResult> UpdateSkill([FromRoute] int id, Skill updateSkillRequest)
         {
             var skill = await _dbContext.Skills.FindAsync(id);
@@ -79,7 +72,7 @@ namespace BISP_API.Controllers
         }
 
         [HttpDelete]
-        [Route("{id}")]
+        [Route("DeleteSkillBy/{id}")]
         public async Task<IActionResult> DeleteSkill([FromRoute] int id)
         {
             var skill = await _dbContext.Skills.FindAsync(id);
@@ -89,160 +82,67 @@ namespace BISP_API.Controllers
                 return NotFound();
             }
 
-            _dbContext.Remove(skill);
+            // Check if the skill is connected to any swap requests, including those marked as deleted
+            var swapRequests = await _dbContext.SwapRequests
+                .Where(sr => (sr.SkillOfferedId == id || sr.SkillRequestedId == id) && (sr.StatusRequest == SwapRequest.Status.Pending || sr.IsDeleted))
+                .ToListAsync();
+
+
             await _dbContext.SaveChangesAsync();
+
+            _dbContext.Skills.Remove(skill);
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                return BadRequest("This skill cannot be deleted because it is associated with existing swap requests.");
+            }
 
             return Ok(skill);
         }
 
 
-        [HttpGet("GetImage")]
-        public async Task<IActionResult> GetImage(string imgId)
+
+        [HttpGet]
+        [Route("GetAllSkills")]
+        public async Task<IActionResult> GetAllSkills()
         {
-            string Imageurl = string.Empty;
-            string hosturl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
-            try
-            {
-                string Filepath = GetFilePath(imgId);
-                string imagepath = Filepath + "\\" + imgId + ".png";
-                if (System.IO.File.Exists(imagepath))
-                {
-                    Imageurl = hosturl + "/Uploads/SKill/" + imgId + "/" + imgId + ".png";
-                }
-                else
-                {
-                    return NotFound();
-                }
-            }
-            catch (Exception)
-            {
-            }
-            return Ok(Imageurl);
+            var skills = await _dbContext.Skills.Include(s => s.User).ToListAsync();
+            return Ok(skills);
         }
 
-
-
-        [HttpPost("UploadImage")]
-        public async Task<ActionResult> UploadImage(IFormFile formFile, string imgId)
+        [HttpGet]
+        [Route("GetSkillsByUserId/{userId}")]
+        public async Task<IActionResult> GetSkillsByUserId([FromRoute] int userId)
         {
-            APIResponse response = new();
-            try
-            {
-                string Filepath = GetFilePath(imgId);
-                if (!System.IO.Directory.Exists(Filepath))
-                {
-                    System.IO.Directory.CreateDirectory(Filepath);
-                }
-                string imagepath = Filepath + "\\" + imgId + ".png";
-                if (System.IO.File.Exists(imagepath))
-                {
-                    System.IO.File.Delete(imagepath);
-                }
-                using FileStream stream = System.IO.File.Create(imagepath);
-                await formFile.CopyToAsync(stream);
-                response.ResponseCode = 200;
-                response.Result = "pass";
-            }
-            catch (Exception ex)
-            {
-                response.Message = ex.Message;
-            }
-            return Ok(response);
-        }
+            var user = await _dbContext.Users.Include(u => u.Skills).FirstOrDefaultAsync(u => u.UserId == userId);
 
-
-        [HttpDelete("RemoveImage")]
-        public async Task<IActionResult> RemoveImage(string imgId)
-        {
-            try
-            {
-                string Filepath = GetFilePath(imgId);
-                string Imagepath = Filepath + "\\" + imgId + ".png";
-                if (System.IO.File.Exists(Imagepath))
-                {
-                    System.IO.File.Delete(Imagepath);
-                    return Ok("pass");
-                }
-                else
-                {
-                    return NotFound();
-                }
-            }
-            catch (Exception)
+            if (user == null)
             {
                 return NotFound();
             }
+
+            return Ok(user.Skills);
         }
 
 
-        [HttpGet("GetDBImage")]
-        public async Task<IActionResult> GetDBImage(string imgcode)
+
+        [HttpGet]
+        [Route("GetSkillAndUserBy/{id}")]
+        public async Task<IActionResult> GetSkillAndUserById([FromRoute] int id)
         {
-            List<string> Imageurl = new();
-            try
-            {
-                var _productimage = this._dbContext.Images.Where(item => item.Imgcode == imgcode).ToList();
-                if (_productimage != null && _productimage.Count > 0)
-                {
-                    _productimage.ForEach(item =>
-                    {
-                        Imageurl.Add(Convert.ToBase64String(item.Img));
-                    });
-                }
-                else
-                {
-                    return NotFound();
-                }
+            var skill = await _dbContext.Skills.Include(s => s.User).FirstOrDefaultAsync(s => s.SkillId == id);
 
-            }
-            catch (Exception)
+            if (skill == null)
             {
+                return NotFound();
             }
-            return Ok(Imageurl);
 
+            return Ok(skill);
         }
 
 
-        [HttpPut("DBUploadImage")]
-        public async Task<IActionResult> DBMUploadImage(IFormFileCollection filecollection, string imgoCode)
-        {
-            APIResponse response = new();
-            int passcount = 0; int errorcount = 0;
-            try
-            {
-                foreach (var file in filecollection)
-                {
-                    using MemoryStream stream = new();
-                    await file.CopyToAsync(stream);
-                    this._dbContext.Images.Add(new Image()
-                    {
-                        Imgcode = imgoCode,
-                        Img = stream.ToArray()
-                    });
-                    await this._dbContext.SaveChangesAsync();
-                    passcount++;
-                }
-
-
-            }
-            catch (Exception ex)
-            {
-                errorcount++;
-                response.Message = ex.Message;
-            }
-            response.ResponseCode = 200;
-            response.Result = passcount + " Files uploaded & " + errorcount + " files failed";
-            return Ok(response);
-        }
-
-
-       
-
-
-        [NonAction]
-        public string GetFilePath(string imgId)
-        {
-            return this.hostingEnv.WebRootPath + "\\Uploads\\Skill\\" + imgId;
-        }
     }
 }

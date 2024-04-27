@@ -4,7 +4,7 @@ namespace BISP_API.Helpers
 {
     public class PasswordHasher
     {
-        private static RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider();
+        private static RNGCryptoServiceProvider rngCsp = new();
         private static readonly int SaltSize = 16;
         private static readonly int HashSize = 20;
         private static readonly int Iterations = 10000;

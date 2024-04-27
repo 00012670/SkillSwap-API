@@ -16,9 +16,9 @@ namespace BISP_API.Context
         public DbSet<SwapRequest> SwapRequests { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Message> Messages { get; set; }
-        public DbSet<Calendar> Calendars { get; set; }
-        public DbSet<Subscriber> Subscribers { get; set; }
+     //   public DbSet<Subscriber> Subscribers { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<SkillImage> SkillImages { get; set; }
 
 
         public override int SaveChanges()
@@ -44,19 +44,6 @@ namespace BISP_API.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
-            //modelBuilder.Entity<User>()
-            //    .HasMany(u => u.SwapRequestsInitiated)
-            //    .WithOne(sr => sr.Initiator)
-            //    .HasForeignKey(sr => sr.InitiatorId)
-            //    .OnDelete(DeleteBehavior.Cascade);
-
-            //modelBuilder.Entity<User>()
-            //    .HasMany(u => u.SwapRequestsReceived)
-            //    .WithOne(sr => sr.Receiver)
-            //    .HasForeignKey(sr => sr.ReceiverId)
-            //    .OnDelete(DeleteBehavior.Cascade);
-
 
             modelBuilder.Entity<SwapRequest>()
                  .HasOne(sr => sr.Initiator)
@@ -118,12 +105,6 @@ namespace BISP_API.Context
                 .HasForeignKey(m => m.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Calendar>()
-                .HasOne(c => c.User)
-                .WithMany(u => u.Calendars)
-                .HasForeignKey(c => c.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             modelBuilder.Entity<Notification>()
                 .HasOne(n => n.Message)
                 .WithMany(m => m.Notifications)
@@ -135,8 +116,6 @@ namespace BISP_API.Context
                 .WithMany(sr => sr.Notifications)
                 .HasForeignKey(n => n.SwapRequestId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-
         }
     }
 }

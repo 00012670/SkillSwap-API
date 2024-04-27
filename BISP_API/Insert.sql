@@ -72,6 +72,7 @@ drop table Images
 
 drop table Messages
 
+
 SELECT DB_NAME() AS CurrentDatabase;
 
 SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Users';
@@ -83,9 +84,62 @@ IF OBJECT_ID('Users', 'U') IS NOT NULL
 
      DELETE FROM __EFMigrationsHistory
 
-     SELECT * 
-FROM sys.objects 
+
+
+
+DECLARE @Sql NVARCHAR(500) DECLARE @Cursor CURSOR
+
+SET @Cursor = CURSOR FAST_FORWARD FOR
+SELECT DISTINCT sql = 'DROP TABLE [' + tc2.TABLE_SCHEMA + '].[' +  tc2.TABLE_NAME + ']'
+FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc1
+INNER JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc2 ON tc1.TABLE_SCHEMA = tc2.TABLE_SCHEMA
+AND tc1.CONSTRAINT_TYPE = 'FOREIGN KEY'
+OPEN @Cursor FETCH NEXT FROM @Cursor INTO @Sql
+
+WHILE (@@FETCH_STATUS = 0)
+BEGIN
+    Exec sp_executesql @Sql
+    FETCH NEXT FROM @Cursor INTO @Sql
+END
+
+CLOSE @Cursor DEALLOCATE @Cursor
+GO
+
+EXEC sp_MSforeachtable @command1 = "DROP TABLE ?"
+GO
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Users';
+
+IF OBJECT_ID('Users', 'U') IS NOT NULL
+    DROP TABLE [Users];
+
+    ALTER DATABASE Users MODIFY NAME = MyUsers
+
+     DELETE FROM __EFMigrationsHistory
+
+SELECT *  FROM sys.objects 
 WHERE name = 'Users'
 
 IF OBJECT_ID('Users', 'U') IS NOT NULL
     DROP TABLE [Users];
+
+    DROP TABLE Users;
+    TRUNCATE TABLE [Users];

@@ -8,48 +8,50 @@ namespace BISP_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ImageController: ControllerBase
+    public class SkillImageController : ControllerBase
     {
         private readonly BISPdbContext _dbContext;
-        public ImageController(BISPdbContext dbContext)
+
+        public SkillImageController(BISPdbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        [HttpPost("UploadImage/{userId}")]
-        public async Task<ActionResult> UploadImage(IFormFile formFile, int userId)
+        [HttpPost("UploadSkillImage/{skillId}")]
+        public async Task<ActionResult> UploadSkillImage(IFormFile formFile, int skillId)
         {
             APIResponse response = new();
             try
             {
-                var user = _dbContext.Users.Include(u => u.ProfileImage).SingleOrDefault(u => u.UserId == userId);
-                if (user == null)
+                var skill = _dbContext.Skills.Include(u => u.SkillImage).SingleOrDefault(u => u.SkillId == skillId);
+                if (skill == null)
                 {
-                    return NotFound("User not found");
+                    return NotFound("Skill not found");
                 }
 
                 using MemoryStream stream = new();
                 await formFile.CopyToAsync(stream);
                 var imageData = stream.ToArray();
 
-                if (user.ProfileImage != null)
+                if (skill.SkillImage != null)
                 {
-                    user.ProfileImage.Img = imageData;
-                    user.HasImage = true;
+                    // Update the existing image
+                    skill.SkillImage.Img = imageData;
                     response.Message = "Image updated successfully";
                 }
                 else
                 {
-                    var image = new Image()
+                    // Create a new image
+                    var image = new SkillImage()
                     {
                         Img = imageData,
-                        UserId = userId
+                        SkillId = skillId
                     };
-                    _dbContext.Images.Add(image);
-                    user.ProfileImage = image;
-                    user.HasImage = true;
+                    _dbContext.SkillImages.Add(image);
+                    skill.SkillImage = image;
                     response.Message = "Image uploaded successfully";
                 }
+                skill.HasImage = true;
                 await _dbContext.SaveChangesAsync();
                 response.ResponseCode = 200;
                 response.Result = "pass";
@@ -62,18 +64,18 @@ namespace BISP_API.Controllers
         }
 
 
-        [HttpGet("GetImageByUserId/{userId}")]
-        public async Task<IActionResult> GetImageByUserId(int userId)
+        [HttpGet("GetSkillImageBySkillId/{skillId}")]
+        public async Task<IActionResult> GetSkillImageBySkillId(int skillId)
         {
             try
             {
-                var user = await _dbContext.Users.Include(u => u.ProfileImage).SingleOrDefaultAsync(u => u.UserId == userId);
-                if (user == null || user.ProfileImage == null)
+                var skill = await _dbContext.Skills.Include(u => u.SkillImage).SingleOrDefaultAsync(u => u.SkillId == skillId);
+                if (skill == null || skill.SkillImage == null)
                 {
                     return NotFound();
                 }
 
-                return File(user.ProfileImage.Img, "image/png");
+                return File(skill.SkillImage.Img, "image/png");
             }
             catch (Exception ex)
             {
@@ -81,8 +83,8 @@ namespace BISP_API.Controllers
             }
         }
 
-        [HttpGet("GetImage/{id}")]
-        public async Task<IActionResult> GetImage(int id)
+        [HttpGet("GetSkillImage/{id}")]
+        public async Task<IActionResult> GetSkillImage(int id)
         {
             try
             {
@@ -100,22 +102,20 @@ namespace BISP_API.Controllers
             }
         }
 
-
-
-        [HttpDelete("RemoveImage/{userId}")]
-        public async Task<IActionResult> RemoveImage(int userId)
+        [HttpDelete("RemoveSkillImage/{skillId}")]
+        public async Task<IActionResult> RemoveSkillImage(int skillId)
         {
             try
             {
-                var user = await _dbContext.Users.Include(u => u.ProfileImage).SingleOrDefaultAsync(u => u.UserId == userId);
-                if (user == null || user.ProfileImage == null)
+                var skill = await _dbContext.Skills.Include(u => u.SkillImage).SingleOrDefaultAsync(u => u.SkillId == skillId);
+                if (skill == null || skill.SkillImage == null)
                 {
                     return NotFound();
                 }
 
-                _dbContext.Images.Remove(user.ProfileImage);
-                user.ProfileImage = null;
-                user.HasImage = false;
+                _dbContext.SkillImages.Remove(skill.SkillImage);
+                skill.SkillImage = null;
+                skill.HasImage = false;
                 await _dbContext.SaveChangesAsync();
                 return NoContent();
             }
@@ -124,6 +124,7 @@ namespace BISP_API.Controllers
                 return StatusCode(500, $"Internal server error: {ex}");
             }
         }
+
 
     }
 }

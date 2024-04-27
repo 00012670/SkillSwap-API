@@ -49,7 +49,7 @@ namespace BISP_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Calendars");
+                    b.ToTable("Calendar");
                 });
 
             modelBuilder.Entity("BISP_API.Models.Image", b =>
@@ -211,6 +211,9 @@ namespace BISP_API.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("HasImage")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsPaid")
                         .HasColumnType("bit");
 
@@ -226,6 +229,9 @@ namespace BISP_API.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("Video")
+                        .HasColumnType("varbinary(max)");
+
                     b.HasKey("SkillId");
 
                     b.HasIndex("UserId");
@@ -233,23 +239,26 @@ namespace BISP_API.Migrations
                     b.ToTable("Skills");
                 });
 
-            modelBuilder.Entity("BISP_API.Models.Subscriber", b =>
+            modelBuilder.Entity("BISP_API.Models.SkillImage", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("SkillImageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.Property<DateTime>("CurrentPeriodEnd")
-                        .HasColumnType("datetime2");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SkillImageId"), 1L, 1);
 
-                    b.Property<string>("CustomerId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("Img")
+                        .HasColumnType("varbinary(max)");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("SkillId")
+                        .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("SkillImageId");
 
-                    b.ToTable("Subscribers");
+                    b.HasIndex("SkillId")
+                        .IsUnique();
+
+                    b.ToTable("SkillImages");
                 });
 
             modelBuilder.Entity("BISP_API.Models.SwapRequest", b =>
@@ -471,6 +480,17 @@ namespace BISP_API.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BISP_API.Models.SkillImage", b =>
+                {
+                    b.HasOne("BISP_API.Models.Skill", "Skill")
+                        .WithOne("SkillImage")
+                        .HasForeignKey("BISP_API.Models.SkillImage", "SkillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Skill");
+                });
+
             modelBuilder.Entity("BISP_API.Models.SwapRequest", b =>
                 {
                     b.HasOne("BISP_API.Models.User", "Initiator")
@@ -512,6 +532,8 @@ namespace BISP_API.Migrations
             modelBuilder.Entity("BISP_API.Models.Skill", b =>
                 {
                     b.Navigation("Reviews");
+
+                    b.Navigation("SkillImage");
 
                     b.Navigation("SwapRequestsExchanged");
 

@@ -77,7 +77,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+//builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 builder.Services.AddScoped<IJWTService, JWTService>();
 
 

@@ -31,15 +31,14 @@ namespace BISP_API.Controllers
             // Check if the SwapRequest exists
             if (swapRequest == null)
             {
-                return NotFound("SwapRequest not found");
+                return NotFound(new { Message = "SwapRequest not found" });
             }
 
             // Check if the SwapRequest has been accepted
             if (swapRequest.StatusRequest != SwapRequest.Status.Accepted)
             {
-                return BadRequest("Cannot create review for a SwapRequest that has not been accepted");
+                return BadRequest(new { Message = "Cannot create review for a SwapRequest that has not been accepted" });
             }
-
 
             // Validate and add review to the database
             _dbContext.Reviews.Add(review);

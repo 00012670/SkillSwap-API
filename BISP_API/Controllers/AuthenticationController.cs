@@ -68,19 +68,19 @@ namespace BISP_API.Controllers
                 return BadRequest(new { Message = "Incorrect password" });
             }
 
-            var subscription = await _subscriberRepository.GetByCustomerIdAsync(auth.CustomerId);
-            DateTime expDate;
-            var isSubscriber = false;
+           // var subscription = await _subscriberRepository.GetByCustomerIdAsync(auth.CustomerId);
+            //DateTime expDate;
+            //var isSubscriber = false;
 
-            if (subscription != null && subscription.Status == "active")
-            {
-                isSubscriber = true;
-                expDate = subscription.CurrentPeriodEnd;
-            }
-            else
-            {
-                expDate = DateTime.Now.AddDays(7);
-            }
+            //if (subscription != null && subscription.Status == "active")
+            //{
+            //    isSubscriber = true;
+            //    expDate = subscription.CurrentPeriodEnd;
+            //}
+            //else
+            //{
+            //    expDate = DateTime.Now.AddDays(7);
+            //}
 
             auth.Token = _jwtService.CreateJwt(auth, isSubscriber);
             var newAccessToken = auth.Token;

@@ -12,6 +12,13 @@
         public User User { get; set; }
         public bool IsPaid { get; set; }
 
+        public SkillImage SkillImage { get; set; }
+
+        public bool HasImage { get; set; }
+
+        public byte[] Video { get; set; }
+
+
 
         public ICollection<SwapRequest> SwapRequestsOffered { get; set; }
         public ICollection<SwapRequest> SwapRequestsExchanged { get; set; }

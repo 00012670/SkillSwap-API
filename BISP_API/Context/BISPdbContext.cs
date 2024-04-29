@@ -16,7 +16,7 @@ namespace BISP_API.Context
         public DbSet<SwapRequest> SwapRequests { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Message> Messages { get; set; }
-     //   public DbSet<Subscriber> Subscribers { get; set; }
+        public DbSet<Subscriber> Subscribers { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<SkillImage> SkillImages { get; set; }
 

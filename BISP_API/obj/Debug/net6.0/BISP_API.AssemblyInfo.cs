@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BISP_API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+771831d6dfae229eb5d9ff65653c8c66cd30850b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0bfd8bfbe022677f6e876aea09de77d44ed0911f")]
 [assembly: System.Reflection.AssemblyProductAttribute("BISP_API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BISP_API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -56,43 +56,5 @@ namespace BISP_API.Controllers
 
             return NoContent();
         }
-
-
-        //[HttpPut("ReadNotification/{notificationId}")]
-        //public async Task<IActionResult> ReadNotification(int notificationId)
-        //{
-        //    var notification = await _context.Notifications.FindAsync(notificationId);
-        //    if (notification == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    notification.IsRead = true;
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
-        //[HttpPut("MarkAllAsRead/{userId}")]
-        //public async Task<IActionResult> MarkAllAsRead(int userId)
-        //{
-        //    var unreadNotifications = _context.Notifications.Where(n => n.UserId == userId && !n.IsRead);
-        //    if (!unreadNotifications.Any())
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    foreach (var notification in unreadNotifications)
-        //    {
-        //        notification.IsRead = true;
-        //    }
-
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
-
-
     }
 }

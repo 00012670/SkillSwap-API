@@ -5,12 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using BISP_API.Models.Dto;
-using BISP_API.UtilitySeervice;
 using Google.Apis.Auth;
 using BISP_API.Repositories;
 using BISP_API.Services;
@@ -23,18 +19,16 @@ namespace BISP_API.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        private readonly BISPdbContext _authContext;
-        private readonly IConfiguration _config;
-        private readonly IEmailService _emailService;
-        private readonly ISubscriptionRepository _subscriberRepository;
-        private readonly IJWTService _jwtService;
-        private bool isSubscriber;
+        // Private fields for dependencies
+        private readonly BISPdbContext _authContext; // Database context
+        private readonly ISubscriptionRepository _subscriberRepository; // Subscription repository
+        private readonly IJWTService _jwtService; // JWT service
+        private bool isSubscriber; // Boolean to check if user is a subscriber
 
-        public AuthenticationController(BISPdbContext appDbContext, IConfiguration configuration, IEmailService emailService, ISubscriptionRepository subscriberRepository, IJWTService jWTService)
+
+        public AuthenticationController(BISPdbContext appDbContext, IConfiguration configuration, ISubscriptionRepository subscriberRepository, IJWTService jWTService)
         {
             _authContext = appDbContext;
-            _config = configuration;
-            _emailService = emailService;
             _subscriberRepository = subscriberRepository;
             _jwtService = jWTService;
         }
@@ -68,19 +62,19 @@ namespace BISP_API.Controllers
                 return BadRequest(new { Message = "Incorrect password" });
             }
 
-           // var subscription = await _subscriberRepository.GetByCustomerIdAsync(auth.CustomerId);
-            //DateTime expDate;
-            //var isSubscriber = false;
+            var subscription = await _subscriberRepository.GetByCustomerIdAsync(auth.CustomerId);
+            DateTime expDate;
+            var isSubscriber = false;
 
-            //if (subscription != null && subscription.Status == "active")
-            //{
-            //    isSubscriber = true;
-            //    expDate = subscription.CurrentPeriodEnd;
-            //}
-            //else
-            //{
-            //    expDate = DateTime.Now.AddDays(7);
-            //}
+            if (subscription != null && subscription.Status == "active")
+            {
+                isSubscriber = true;
+                expDate = subscription.CurrentPeriodEnd;
+            }
+            else
+            {
+                expDate = DateTime.Now.AddDays(7);
+            }
 
             auth.Token = _jwtService.CreateJwt(auth, isSubscriber);
             var newAccessToken = auth.Token;
@@ -240,68 +234,6 @@ namespace BISP_API.Controllers
             {
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
-            });
-        }
-
-        [HttpPost("SendResetEmail/{email}")] 
-        public async Task<IActionResult> SendEmail(string email)
-        {
-            var user = await _authContext.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if(user is null)
-            {
-                return NotFound(new
-                {
-                    StatusCode = 404,
-                    Message = "Email doesn't exist"
-                });
-            }
-            var tokenBytes = RandomNumberGenerator.GetBytes(64);
-            var emailToken = Convert.ToBase64String(tokenBytes);
-            user.ResetPasswordToken = emailToken;
-            user.ResetPasswordExpiry = DateTime.Now.AddMinutes(15);
-            string from = _config["EmailSettings:From"];
-            var emailModel = new EmailModel(email, "Reset Password!!", EmailBody.EmailStringBody(email, emailToken));
-            _emailService.SendEmail(emailModel);
-            _authContext.Entry(user).State = EntityState.Modified;
-            await _authContext.SaveChangesAsync();
-            return Ok(new
-            {
-                StatusCode = 200,
-                Message = "Email Sent!"
-            }) ;
-        }
-
-
-        [HttpPost("ResetPassword")]
-        public async Task<IActionResult> RessetPassword(ResetPasswordDto resetPasswordDto)
-        {
-            var newToke = resetPasswordDto.EmailToken.Replace(" ", "+");
-            var user = await _authContext.Users.AsNoTracking().FirstOrDefaultAsync(a => a.Email == resetPasswordDto.Email);
-            if (user is null)
-            {
-                return NotFound(new
-                {
-                    StatusCode = 404,
-                    Message = "User doesn't exist"
-                });
-            }
-             var tokenCode = user.ResetPasswordToken;
-             DateTime emailTokenExpiry = user.ResetPasswordExpiry;
-             if(tokenCode != resetPasswordDto.EmailToken || emailTokenExpiry < DateTime.Now)
-             {
-                return BadRequest(new
-                {
-                    StatusCode = 400,
-                    Message = "Invalid reset link"
-                });
-             }
-            user.Password = PasswordHasher.HashPassword(resetPasswordDto.NewPassword);
-            _authContext.Entry(user).State = EntityState.Modified;
-            await _authContext.SaveChangesAsync();
-            return Ok(new
-            {
-                StatusCode = 200,
-                Message = "Password reset successfully"
             });
         }
     }

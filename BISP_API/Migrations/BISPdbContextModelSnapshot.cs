@@ -22,36 +22,6 @@ namespace BISP_API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("BISP_API.Models.Calendar", b =>
-                {
-                    b.Property<int>("EventId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventId"), 1L, 1);
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EventDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EventName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("EventId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Calendar");
-                });
-
             modelBuilder.Entity("BISP_API.Models.Image", b =>
                 {
                     b.Property<int>("ImgId")
@@ -261,6 +231,25 @@ namespace BISP_API.Migrations
                     b.ToTable("SkillImages");
                 });
 
+            modelBuilder.Entity("BISP_API.Models.Subscriber", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CurrentPeriodEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CustomerId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Subscribers");
+                });
+
             modelBuilder.Entity("BISP_API.Models.SwapRequest", b =>
                 {
                     b.Property<int>("RequestId")
@@ -366,17 +355,6 @@ namespace BISP_API.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("BISP_API.Models.Calendar", b =>
-                {
-                    b.HasOne("BISP_API.Models.User", "User")
-                        .WithMany("Calendars")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BISP_API.Models.Image", b =>
@@ -549,8 +527,6 @@ namespace BISP_API.Migrations
 
             modelBuilder.Entity("BISP_API.Models.User", b =>
                 {
-                    b.Navigation("Calendars");
-
                     b.Navigation("Notifications");
 
                     b.Navigation("ProfileImage");

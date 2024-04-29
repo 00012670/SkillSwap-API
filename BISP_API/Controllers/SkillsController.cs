@@ -82,26 +82,30 @@ namespace BISP_API.Controllers
                 return NotFound();
             }
 
-            // Check if the skill is connected to any swap requests, including those marked as deleted
-            var swapRequests = await _dbContext.SwapRequests
-                .Where(sr => (sr.SkillOfferedId == id || sr.SkillRequestedId == id) && (sr.StatusRequest == SwapRequest.Status.Pending || sr.IsDeleted))
+            // Check if the skill is associated with any accepted swap requests
+            var acceptedSwapRequests = await _dbContext.SwapRequests
+                .Where(sr => (sr.SkillOfferedId == id || sr.SkillRequestedId == id) && sr.StatusRequest == SwapRequest.Status.Accepted)
                 .ToListAsync();
 
+            if (acceptedSwapRequests.Count > 0)
+            {
+                return BadRequest(new { Message= "This skill cannot be deleted because it is associated with accepted swap requests." });
+            }
 
-            await _dbContext.SaveChangesAsync();
+            // Get the swap requests associated with the skill
+            var swapRequests = await _dbContext.SwapRequests
+                .Where(sr => sr.SkillOfferedId == id || sr.SkillRequestedId == id)
+                .ToListAsync();
+
+            // Remove the associated swap requests
+            _dbContext.SwapRequests.RemoveRange(swapRequests);
 
             _dbContext.Skills.Remove(skill);
-            try
-            {
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                return BadRequest("This skill cannot be deleted because it is associated with existing swap requests.");
-            }
+            await _dbContext.SaveChangesAsync();
 
             return Ok(skill);
         }
+
 
 
 

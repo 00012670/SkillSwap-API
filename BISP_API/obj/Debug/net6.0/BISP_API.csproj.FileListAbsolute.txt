@@ -153,4 +153,3 @@ C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\System.Managemen
 C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\runtimes\win\lib\net6.0\System.Management.dll
 C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
 C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\Google.Apis.Calendar.v3.dll
-C:\Users\Dinora\Desktop\BISP\BISP_API\BISP_API\bin\Debug\net6.0\client_secret_1079640577230-2rsqh8j2bs6c43vamc1eetmtvkp5i240.apps.googleusercontent.com.json

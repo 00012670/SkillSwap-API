@@ -6,8 +6,6 @@ using Microsoft.IdentityModel.Tokens;
 using Stripe;
 using System.Text;
 using System.Text.Json.Serialization;
-using BISP_API.UtilitySeervice;
-using BISP_API.UtilityService;
 using BISP_API.Models.Stripe;
 using BISP_API.Repositories;
 using BISP_API.Services;
@@ -76,8 +74,7 @@ builder.Services.AddControllers().AddJsonOptions(x =>
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
-builder.Services.AddScoped<IEmailService, EmailService>();
-//builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 builder.Services.AddScoped<IJWTService, JWTService>();
 
 

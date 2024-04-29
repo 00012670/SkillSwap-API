@@ -7,16 +7,16 @@ namespace BISP_API.Models
 {
     public class User 
     {
-        public User()
-        {
-            Skills = new HashSet<Skill>();
-            SwapRequestsInitiated = new HashSet<SwapRequest>();
-            SwapRequestsReceived = new HashSet<SwapRequest>();
-            ReviewsSent = new HashSet<Review>();
-            ReviewsReceived = new HashSet<Review>();
-            SentMessages = new HashSet<Message>();
-            ReceivedMessages = new HashSet<Message>();
-        }
+        //public User()
+        //{
+        //    Skills = new HashSet<Skill>();
+        //    SwapRequestsInitiated = new HashSet<SwapRequest>();
+        //    SwapRequestsReceived = new HashSet<SwapRequest>();
+        //    ReviewsSent = new HashSet<Review>();
+        //    ReviewsReceived = new HashSet<Review>();
+        //    SentMessages = new HashSet<Message>();
+        //    ReceivedMessages = new HashSet<Message>();
+        //}
 
         [Key]
         public int UserId { get; set; }
@@ -67,7 +67,6 @@ namespace BISP_API.Models
         public ICollection<Message> SentMessages { get; set; }
 
         public ICollection<Message> ReceivedMessages { get; set; }
-        public ICollection<Calendar> Calendars { get; set; }
         public ICollection<Notification> Notifications { get; set; }
 
     }

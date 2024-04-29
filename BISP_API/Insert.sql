@@ -111,6 +111,31 @@ GO
 
 
 
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Users')
+BEGIN
+    -- Your CREATE TABLE statement here
+    CREATE TABLE [Users] (
+        [UserId] int NOT NULL IDENTITY,
+        [Username] nvarchar(max) NOT NULL,
+        [Email] nvarchar(max) NULL,
+        [Password] nvarchar(max) NULL,
+        [FullName] nvarchar(max) NULL,
+        [Bio] nvarchar(max) NULL,
+        [SkillInterested] nvarchar(max) NULL,
+        [Token] nvarchar(max) NULL,
+        [Role] nvarchar(max) NULL,
+        [HasImage] bit NOT NULL,
+        [IsPremium] bit NOT NULL,
+        [IsSuspended] bit NOT NULL,
+        [RefreshToken] nvarchar(max) NULL,
+        [GoogleId] nvarchar(max) NULL,
+        [ResetPasswordToken] nvarchar(max) NULL,
+        [ResetPasswordExpiry] datetime2 NOT NULL,
+        [RefreshTokenExpiryTime] datetime2 NOT NULL,
+        [CustomerId] nvarchar(max) NULL,
+        CONSTRAINT [PK_Users] PRIMARY KEY ([UserId])
+    );
+END
 
 
 
@@ -118,6 +143,9 @@ GO
 
 
 
+UPDATE SwapRequests SET SkillRequestedId = NULL WHERE SkillRequestedId = 10;
+UPDATE SwapRequests SET SkillOfferedId = NULL WHERE SkillOfferedId = 10;
+DELETE FROM Skills WHERE SkillId = 10;
 
 
 

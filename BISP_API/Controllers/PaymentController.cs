@@ -11,12 +11,6 @@ using BISP_API.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 
-//public class StripeOptions
-//{
-//    public string option { get; set; }
-//}
-
-
 namespace BISP_API.Controllers
 {
     [ApiController]
@@ -45,53 +39,53 @@ namespace BISP_API.Controllers
 
 
 
-        //[HttpGet("Products")]
-        //public IActionResult Product() 
-        //{
-        //    StripeConfiguration.ApiKey = "sk_test_51OuxWhP2zd9Sg1qK2AZzWnAtnjbxd069o0EVoSgDwaSc8GI98keZQkv8YADGO6dibvoZRYCDORS0bxQcQ1afDvLz00IEedfrQX";
+        [HttpGet("Products")]
+        public IActionResult Product()
+        {
+            StripeConfiguration.ApiKey = "sk_test_51OuxWhP2zd9Sg1qK2AZzWnAtnjbxd069o0EVoSgDwaSc8GI98keZQkv8YADGO6dibvoZRYCDORS0bxQcQ1afDvLz00IEedfrQX";
 
-        //    var service = new ProductService();
-        //    var options = new ProductListOptions { Limit = 3 };
-        //    StripeList<Product> products = service.List(options);
+            var service = new ProductService();
+            var options = new ProductListOptions { Limit = 3 };
+            StripeList<Product> products = service.List(options);
 
-        //    return Ok(products);
-        //}
+            return Ok(products);
+        }
 
 
-        //[HttpPost]
-        //public ActionResult Create()
-        //{
-        //    var domain = "http://localhost:4242";
+        [HttpPost]
+        public ActionResult Create()
+        {
+            var domain = "http://localhost:4242";
 
-        //    var priceOptions = new PriceListOptions
-        //    {
-        //        LookupKeys = new List<string> {
-        //            Request.Form["lookup_key"]
-        //        }
-        //    };
-        //    var priceService = new PriceService();
-        //    StripeList<Price> prices = priceService.List(priceOptions);
+            var priceOptions = new PriceListOptions
+            {
+                LookupKeys = new List<string> {
+                    Request.Form["lookup_key"]
+                }
+            };
+            var priceService = new PriceService();
+            StripeList<Price> prices = priceService.List(priceOptions);
 
-        //    var options = new SessionCreateOptions
-        //    {
-        //        LineItems = new List<SessionLineItemOptions>
-        //        {
-        //          new SessionLineItemOptions
-        //          {
-        //            Price = prices.Data[0].Id,
-        //            Quantity = 1,
-        //          },
-        //        },
-        //        Mode = "subscription",
-        //        SuccessUrl = domain + "/success.html?session_id={CHECKOUT_SESSION_ID}",
-        //        CancelUrl = domain + "/cancel.html",
-        //    };
-        //    var service = new SessionService();
-        //    Session session = service.Create(options);
+            var options = new SessionCreateOptions
+            {
+                LineItems = new List<SessionLineItemOptions>
+                {
+                  new SessionLineItemOptions
+                  {
+                    Price = prices.Data[0].Id,
+                    Quantity = 1,
+                  },
+                },
+                Mode = "subscription",
+                SuccessUrl = domain + "/success.html?session_id={CHECKOUT_SESSION_ID}",
+                CancelUrl = domain + "/cancel.html",
+            };
+            var service = new SessionService();
+            Session session = service.Create(options);
 
-        //    Response.Headers.Add("Location", session.Url);
-        //    return new StatusCodeResult(303);
-        //}
+            Response.Headers.Add("Location", session.Url);
+            return new StatusCodeResult(303);
+        }
 
 
 
@@ -213,86 +207,86 @@ namespace BISP_API.Controllers
         }
 
 
-        //[HttpPost("webhook")]
-        //public async Task<IActionResult> WebHook()
-        //{
-        //    var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-        //    _logger.LogInformation("WebHook method called");
+        [HttpPost("webhook")]
+        public async Task<IActionResult> WebHook()
+        {
+            var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+            _logger.LogInformation("WebHook method called");
 
 
-        //    try
-        //    {
-        //        var stripeEvent = EventUtility.ConstructEvent(
-        //         json,
-        //         Request.Headers["Stripe-Signature"],
-        //         _stripeSettings.WHSecret
-        //       );
+            try
+            {
+                var stripeEvent = EventUtility.ConstructEvent(
+                 json,
+                 Request.Headers["Stripe-Signature"],
+                 _stripeSettings.WHSecret
+               );
 
-        //        // Handle the event
-        //        if (stripeEvent.Type == Events.CustomerSubscriptionCreated)
-        //        {
-        //            var subscription = stripeEvent.Data.Object as Subscription;
+                // Handle the event
+                if (stripeEvent.Type == Events.CustomerSubscriptionCreated)
+                {
+                    var subscription = stripeEvent.Data.Object as Subscription;
 
-        //            //Do stuff
-        //            await addSubscriptionToDb(subscription);
-        //            _logger.LogInformation("Handling CustomerSubscriptionCreated event");
+                    //Do stuff
+                    await addSubscriptionToDb(subscription);
+                    _logger.LogInformation("Handling CustomerSubscriptionCreated event");
 
-        //        }
-        //        else if (stripeEvent.Type == Events.CustomerSubscriptionUpdated)
-        //        {
-        //            var session = stripeEvent.Data.Object as Subscription;
+                }
+                else if (stripeEvent.Type == Events.CustomerSubscriptionUpdated)
+                {
+                    var session = stripeEvent.Data.Object as Subscription;
 
-        //            // Update Subsription
-        //            await updateSubscription(session);
-        //        }
-        //        else if (stripeEvent.Type == Events.CustomerCreated)
-        //        {
-        //            _logger.LogInformation("Handling CustomerSubscriptionUpdated event");
+                    // Update Subsription
+                    await updateSubscription(session);
+                }
+                else if (stripeEvent.Type == Events.CustomerCreated)
+                {
+                    _logger.LogInformation("Handling CustomerSubscriptionUpdated event");
 
-        //            var customer = stripeEvent.Data.Object as Customer;
+                    var customer = stripeEvent.Data.Object as Customer;
 
-        //            //Do Stuff
-        //            await addCustomerIdToUser(customer);
-        //        }
-        //        // ... handle other event types
-        //        else
-        //        {
-        //            // Unexpected event type
-        //            Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
-        //        }
-        //        return Ok();
-        //    }
-        //    catch (StripeException e)
-        //    {
-        //        Console.WriteLine(e.StripeError.Message);
-        //        return BadRequest();
-        //    }
-        //    catch (Exception e) // catch all other exceptions
-        //    {
-        //        Console.WriteLine(e.Message);
-        //        return StatusCode(500, new { message = e.Message, stackTrace = e.StackTrace });
-        //    }
-        //}
+                    //Do Stuff
+                    await addCustomerIdToUser(customer);
+                }
+                // ... handle other event types
+                else
+                {
+                    // Unexpected event type
+                    Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
+                }
+                return Ok();
+            }
+            catch (StripeException e)
+            {
+                Console.WriteLine(e.StripeError.Message);
+                return BadRequest();
+            }
+            catch (Exception e) // catch all other exceptions
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = e.Message, stackTrace = e.StackTrace });
+            }
+        }
 
-        //private async Task updateSubscription(Subscription subscription)
-        //{
-        //    try
-        //    {
-        //        var subscriptionFromDb = await _subscriberRepository.GetByIdAsync(subscription.Id);
-        //        if (subscriptionFromDb != null)
-        //        {
-        //            subscriptionFromDb.Status = subscription.Status;
-        //            subscriptionFromDb.CurrentPeriodEnd = subscription.CurrentPeriodEnd;
-        //            await _subscriberRepository.UpdateAsync(subscriptionFromDb);
-        //        }
+        private async Task updateSubscription(Subscription subscription)
+        {
+            try
+            {
+                var subscriptionFromDb = await _subscriberRepository.GetByIdAsync(subscription.Id);
+                if (subscriptionFromDb != null)
+                {
+                    subscriptionFromDb.Status = subscription.Status;
+                    subscriptionFromDb.CurrentPeriodEnd = subscription.CurrentPeriodEnd;
+                    await _subscriberRepository.UpdateAsync(subscriptionFromDb);
+                }
 
-        //    }
-        //    catch (System.Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Unable to update subscription");
-        //    }
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Unable to update subscription");
+            }
 
-        //}
+        }
 
         private async Task addCustomerIdToUser(Customer customer)
         {
@@ -314,26 +308,26 @@ namespace BISP_API.Controllers
             }
         }
 
-        //private async Task addSubscriptionToDb(Subscription subscription)
-        //{
-        //    _logger.LogInformation("addSubscriptionToDb called");
+        private async Task addSubscriptionToDb(Subscription subscription)
+        {
+            _logger.LogInformation("addSubscriptionToDb called");
 
-        //    try
-        //    {
-        //        var subscriber = new Subscriber
-        //        {
-        //            Id = subscription.Id,
-        //            CustomerId = subscription.CustomerId,
-        //            Status = "active",
-        //            CurrentPeriodEnd = subscription.CurrentPeriodEnd
-        //        };
-        //        await _subscriberRepository.CreateAsync(subscriber);
-        //    }
-        //    catch (System.Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Unable to add new subscriber to Database");
-        //    }
-        //}
+            try
+            {
+                var subscriber = new Subscriber
+                {
+                    Id = subscription.Id,
+                    CustomerId = subscription.CustomerId,
+                    Status = "active",
+                    CurrentPeriodEnd = subscription.CurrentPeriodEnd
+                };
+                await _subscriberRepository.CreateAsync(subscriber);
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Unable to add new subscriber to Database");
+            }
+        }
     }
 }
 

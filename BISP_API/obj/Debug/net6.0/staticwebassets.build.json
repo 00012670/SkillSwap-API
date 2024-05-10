@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "JpkAMCYK8NbxwKa7kI8Zp6CriYCVc14YdMcJLNRJvnY=",
+  "Hash": "MyVO8my2UkQvNfPReiLPGMxYjT92n7qS6ODk4741vr8=",
   "Source": "BISP_API",
   "BasePath": "_content/BISP_API",
   "Mode": "Default",
@@ -10,7 +10,7 @@
     {
       "Name": "BISP_API\\wwwroot",
       "Source": "BISP_API",
-      "ContentRoot": "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\Dinora\\Desktop\\My works\\WIUT\\BIS6\\BISP\\BISP_API\\BISP_API\\wwwroot\\",
       "BasePath": "_content/BISP_API",
       "Pattern": "**"
     }

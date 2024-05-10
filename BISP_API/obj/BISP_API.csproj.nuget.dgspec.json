@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\BISP_API.csproj": {}
+    "C:\\Users\\Dinora\\Desktop\\My works\\WIUT\\BIS6\\BISP\\BISP_API\\BISP_API\\BISP_API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\BISP_API.csproj": {
+    "C:\\Users\\Dinora\\Desktop\\My works\\WIUT\\BIS6\\BISP\\BISP_API\\BISP_API\\BISP_API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\BISP_API.csproj",
+        "projectUniqueName": "C:\\Users\\Dinora\\Desktop\\My works\\WIUT\\BIS6\\BISP\\BISP_API\\BISP_API\\BISP_API.csproj",
         "projectName": "BISP_API",
-        "projectPath": "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\BISP_API.csproj",
+        "projectPath": "C:\\Users\\Dinora\\Desktop\\My works\\WIUT\\BIS6\\BISP\\BISP_API\\BISP_API\\BISP_API.csproj",
         "packagesPath": "C:\\Users\\Dinora\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\obj\\",
+        "outputPath": "C:\\Users\\Dinora\\Desktop\\My works\\WIUT\\BIS6\\BISP\\BISP_API\\BISP_API\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

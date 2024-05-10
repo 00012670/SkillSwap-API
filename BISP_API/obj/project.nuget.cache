@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "oCKUkebeCHrqQvxEQZhCbk93bLyRiYfBFP9qosx6Au3I6Zb8/pcxvtzXQWMeChm2F5aHqoXgxfkMr/mxLWP75Q==",
+  "dgSpecHash": "+ONgJsApp7lSp7nNqO9SZG0GThTLe4D2l/FCWXwbAouKW35NvuULq0nYUfovUqZYOCyhhF8AVpgBVqHXT4LYoA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Dinora\\Desktop\\BISP\\BISP_API\\BISP_API\\BISP_API.csproj",
+  "projectFilePath": "C:\\Users\\Dinora\\Desktop\\My works\\WIUT\\BIS6\\BISP\\BISP_API\\BISP_API\\BISP_API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Dinora\\.nuget\\packages\\automapper\\11.0.0\\automapper.11.0.0.nupkg.sha512",
     "C:\\Users\\Dinora\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\11.0.0\\automapper.extensions.microsoft.dependencyinjection.11.0.0.nupkg.sha512",

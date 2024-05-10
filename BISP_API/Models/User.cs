@@ -7,16 +7,6 @@ namespace BISP_API.Models
 {
     public class User 
     {
-        //public User()
-        //{
-        //    Skills = new HashSet<Skill>();
-        //    SwapRequestsInitiated = new HashSet<SwapRequest>();
-        //    SwapRequestsReceived = new HashSet<SwapRequest>();
-        //    ReviewsSent = new HashSet<Review>();
-        //    ReviewsReceived = new HashSet<Review>();
-        //    SentMessages = new HashSet<Message>();
-        //    ReceivedMessages = new HashSet<Message>();
-        //}
 
         [Key]
         public int UserId { get; set; }
